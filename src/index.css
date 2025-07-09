@@ -1,2 +1,8 @@
-@import "@ibm/plex/css/ibm-plex.min.css" layer(base);
+@import "@ibm/plex/css/ibm-plex.min.css";
 @import "tailwindcss";
+
+:root {
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-serif: "IBM Plex Serif", serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}

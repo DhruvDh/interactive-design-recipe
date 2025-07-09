@@ -4,7 +4,7 @@ import { Route, Routes } from "react-router-dom";
 
 function NavSidebar() {
   return (
-    <aside className="bg-neutral-800 text-neutral-100 p-6 space-y-4">
+    <aside className="bg-neutral-50 text-neutral-800 p-6 space-y-4 -my-24">
       <h2 className="text-lg font-semibold tracking-wide">Navigation</h2>
       <nav className="space-y-2">
         <a className="block hover:underline" href="/">
@@ -20,7 +20,7 @@ function NavSidebar() {
 
 function ChatSidebar() {
   return (
-    <aside className="bg-neutral-50 border-l border-neutral-200 p-6">
+    <aside className="bg-neutral-50  p-6">
       <h2 className="text-lg font-semibold mb-4">Chat</h2>
       <p className="text-sm text-neutral-600">Chat UI coming soon…</p>
     </aside>
@@ -45,11 +45,8 @@ export default function App() {
       <NavSidebar />
 
       {/* centre column */}
-      <main className="relative flex justify-center overflow-y-auto p-8">
-        <div
-          className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl p-10
-                        -mx-6 sm:-mx-10 lg:-mx-16"
-        >
+      <main className="relative flex justify-center overflow-y-auto bg-neutral-50 p-0.5">
+        <div className="w-full max-w-4xl bg-white rounded-3xl m-0.5 p-10 z-10">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
