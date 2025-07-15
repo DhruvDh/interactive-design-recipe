@@ -4,24 +4,16 @@ import { Route, Routes } from "react-router-dom";
 
 function NavSidebar() {
   return (
-    <aside className="bg-neutral-50 text-neutral-800 p-6 space-y-4 -my-24">
-      <h2 className="text-lg font-semibold tracking-wide">Navigation</h2>
-      <nav className="space-y-2">
-        <a className="block hover:underline" href="/">
-          Home
-        </a>
-        <a className="block hover:underline" href="/about">
-          About
-        </a>
-      </nav>
+    <aside className="bg-neutral-100 text-neutral-800 p-6 space-y-4">
+      <h1 className="text-lg font-semibold tracking-wide">Navigation</h1>
     </aside>
   );
 }
 
 function ChatSidebar() {
   return (
-    <aside className="bg-neutral-50  p-6">
-      <h2 className="text-lg font-semibold mb-4">Chat</h2>
+    <aside className="bg-neutral-100  p-6">
+      <h1 className="text-lg font-semibold mb-4">Chat</h1>
       <p className="text-sm text-neutral-600">Chat UI coming soon…</p>
     </aside>
   );
@@ -30,7 +22,7 @@ function ChatSidebar() {
 /* ---------- pages ---------- */
 
 function Home() {
-  return <h1 className="text-3xl font-bold">Home page</h1>;
+  return <h1 className="text-3xl font-bold">Data Definition</h1>;
 }
 function About() {
   return <h1 className="text-3xl font-bold">About page</h1>;
@@ -45,7 +37,7 @@ export default function App() {
       <NavSidebar />
 
       {/* centre column */}
-      <main className="relative flex justify-center overflow-y-auto bg-neutral-50 p-0.5">
+      <main className="relative flex justify-center overflow-y-auto bg-neutral-100 p-0.5">
         <div className="w-full max-w-4xl bg-white rounded-3xl m-0.5 p-10 z-10">
           <Routes>
             <Route path="/" element={<Home />} />

@@ -1,8 +1,18 @@
+/* 1 – Fonts first, remain in CSS bundle */
 @import "@ibm/plex/css/ibm-plex.min.css";
+
+/* 2 – Tailwind layers */
 @import "tailwindcss";
 
-:root {
-  --font-sans: "IBM Plex Sans", sans-serif;
-  --font-serif: "IBM Plex Serif", serif;
-  --font-mono: "IBM Plex Mono", monospace;
+/* 3 – Global defaults */
+@layer base {
+  :root {
+    --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+    --font-serif: "IBM Plex Serif", ui-serif, serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  }
+
+  body {
+    @apply font-sans text-neutral-900 antialiased;
+  }
 }
