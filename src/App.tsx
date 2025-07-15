@@ -1,32 +1,8 @@
 import { Route, Routes } from "react-router-dom";
-
-/* ---------- sidebars ---------- */
-
-function NavSidebar() {
-  return (
-    <aside className="bg-neutral-100 text-neutral-800 p-6 space-y-4">
-      <h1 className="text-lg font-semibold tracking-wide">Navigation</h1>
-    </aside>
-  );
-}
-
-function ChatSidebar() {
-  return (
-    <aside className="bg-neutral-100  p-6">
-      <h1 className="text-lg font-semibold mb-4">Chat</h1>
-      <p className="text-sm text-neutral-600">Chat UI coming soon…</p>
-    </aside>
-  );
-}
-
-/* ---------- pages ---------- */
-
-function Home() {
-  return <h1 className="text-3xl font-bold">Data Definition</h1>;
-}
-function About() {
-  return <h1 className="text-3xl font-bold">About page</h1>;
-}
+import NavSidebar from "./components/layout/NavSidebar";
+import ChatSidebar from "./components/layout/ChatSidebar";
+import Home from "./pages/Home";
+import About from "./pages/About";
 
 /* ---------- root layout ---------- */
 
