@@ -87,11 +87,6 @@ A step-by-step guide for systematic program design.
 `,
 };
 
-function getFileExtension(filePath: string): string {
-  const lastDot = filePath.lastIndexOf(".");
-  return lastDot === -1 ? "" : filePath.slice(lastDot + 1);
-}
-
 function getFileName(filePath: string): string {
   const parts = filePath.split("/");
   return parts[parts.length - 1];
