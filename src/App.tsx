@@ -21,17 +21,16 @@ export default function App() {
   };
 
   const handleCloseFile = (fileId: string) => {
-    setOpenFiles((prev) => prev.filter((id) => id !== fileId));
+    setOpenFiles((prev) => {
+      const next = prev.filter((id) => id !== fileId);
 
-    // If closing the active file, set active to the last remaining file
-    if (activeFile === fileId) {
-      const remainingFiles = openFiles.filter((id) => id !== fileId);
-      setActiveFile(
-        remainingFiles.length > 0
-          ? remainingFiles[remainingFiles.length - 1]
-          : null
-      );
-    }
+      // If closing the active file, set active to the last remaining file
+      if (activeFile === fileId) {
+        setActiveFile(next.length > 0 ? next[next.length - 1] : null);
+      }
+
+      return next;
+    });
   };
 
   const handleSetActiveFile = (fileId: string) => {
