@@ -33,6 +33,7 @@ const importantQueries = [
   "class_constructors.scm",
   "interface_name.scm",
   "interface_methods.scm",
+  "interface_constants.scm",
   "import.scm",
 ] as const;
 

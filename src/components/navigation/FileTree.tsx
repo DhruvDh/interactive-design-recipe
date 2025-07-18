@@ -14,6 +14,7 @@ interface FileNodeItemProps {
   toggleExpanded: (nodeId: string) => void;
   focusedNodeId?: string;
   setFocusedNodeId: (nodeId: string | undefined) => void;
+  handleVerticalNavigation: (direction: "up" | "down") => void;
 }
 
 function FileNodeItem({
@@ -24,6 +25,7 @@ function FileNodeItem({
   toggleExpanded,
   focusedNodeId,
   setFocusedNodeId,
+  handleVerticalNavigation,
 }: FileNodeItemProps) {
   const isExpanded = expandedDirs.has(node.id);
   const hasChildren = node.children && node.children.length > 0;
@@ -65,9 +67,12 @@ function FileNodeItem({
         }
         break;
       case "ArrowUp":
+        e.preventDefault();
+        handleVerticalNavigation("up");
+        break;
       case "ArrowDown":
         e.preventDefault();
-        // Navigation will be handled by the parent component
+        handleVerticalNavigation("down");
         break;
     }
   };
@@ -108,6 +113,7 @@ function FileNodeItem({
               toggleExpanded={toggleExpanded}
               focusedNodeId={focusedNodeId}
               setFocusedNodeId={setFocusedNodeId}
+              handleVerticalNavigation={handleVerticalNavigation}
             />
           ))}
         </div>
@@ -125,18 +131,53 @@ export function FileTree({ root, onOpenFile }: FileTreeProps) {
   );
 
   // Flatten the tree to get all visible nodes for arrow navigation
-  const getVisibleNodes = (node: FileNode, expanded: Set<string>, result: FileNode[] = []): FileNode[] => {
+  const getVisibleNodes = (
+    node: FileNode,
+    expanded: Set<string>,
+    result: FileNode[] = []
+  ): FileNode[] => {
     result.push(node);
     if (node.type === "dir" && node.children && expanded.has(node.id)) {
-      node.children.forEach(child => getVisibleNodes(child, expanded, result));
+      node.children.forEach((child) =>
+        getVisibleNodes(child, expanded, result)
+      );
     }
     return result;
+  };
+
+  const handleVerticalNavigation = (direction: "up" | "down") => {
+    if (!focusedNodeId) {
+      // If no node is focused, focus the first visible node
+      const visibleNodes = getVisibleNodes(root, expandedDirs);
+      if (visibleNodes.length > 0) {
+        setFocusedNodeId(visibleNodes[0].id);
+      }
+      return;
+    }
+
+    const visibleNodes = getVisibleNodes(root, expandedDirs);
+    const currentIndex = visibleNodes.findIndex(
+      (node) => node.id === focusedNodeId
+    );
+
+    if (currentIndex === -1) return;
+
+    if (direction === "up" && currentIndex > 0) {
+      setFocusedNodeId(visibleNodes[currentIndex - 1].id);
+    } else if (direction === "down" && currentIndex < visibleNodes.length - 1) {
+      setFocusedNodeId(visibleNodes[currentIndex + 1].id);
+    }
   };
 
   const toggleExpanded = (nodeId: string) => {
     setExpandedDirs((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(nodeId)) {
+        // Collapsing directory - check if focused node becomes hidden
+        if (focusedNodeId && focusedNodeId.startsWith(nodeId + "/")) {
+          // Focus is on a child that will be hidden, move to parent
+          setFocusedNodeId(nodeId);
+        }
         newSet.delete(nodeId);
       } else {
         newSet.add(nodeId);
@@ -157,6 +198,7 @@ export function FileTree({ root, onOpenFile }: FileTreeProps) {
           toggleExpanded={toggleExpanded}
           focusedNodeId={focusedNodeId}
           setFocusedNodeId={setFocusedNodeId}
+          handleVerticalNavigation={handleVerticalNavigation}
         />
       </div>
     </div>

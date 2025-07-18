@@ -2,7 +2,6 @@ export interface DRAnalysis {
   classes: ClassInfo[];
   interfaces: InterfaceInfo[];
   imports: ImportInfo[];
-  methods: MethodInfo[];
   // expandable; leave generic for now
 }
 

@@ -8,6 +8,7 @@ export interface AnalysisContextType {
   error: string | null;
   refresh: (files: File[]) => Promise<void>;
   currentProject: RecentEntry | null;
+  files: File[];
 }
 
 export const AnalysisContext = createContext<AnalysisContextType | null>(null);

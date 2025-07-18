@@ -19,7 +19,7 @@ export function ProjectGate({ children }: ProjectGateProps) {
   );
   const [recentFolders, setRecentFolders] = useState<RecentEntry[]>([]);
   const [isLoadingRecent, setIsLoadingRecent] = useState(true);
-  const { analysis, loading, error, refresh } = useAnalysis();
+  const { analysis, loading, error, refresh, files } = useAnalysis();
 
   // Load recent folders from indexedDB
   useEffect(() => {
@@ -52,7 +52,7 @@ export function ProjectGate({ children }: ProjectGateProps) {
   const addToRecentFolders = useCallback(
     (entry: RecentEntry) => {
       setRecentFolders((prev) => {
-        const filtered = prev.filter((f) => f.path !== entry.path);
+        const filtered = prev.filter((f) => f.id !== entry.id);
         const updated = [entry, ...filtered].slice(0, 5); // Keep only 5 most recent
         saveRecentFolders(updated);
         return updated;
@@ -97,10 +97,12 @@ export function ProjectGate({ children }: ProjectGateProps) {
 
         // Create recent entry
         const recentEntry: RecentEntry = {
+          id: crypto.randomUUID(),
           name: dirHandle.name,
           path: dirHandle.name, // For now, use name as path
           handle: dirHandle,
           lastAccessed: Date.now(),
+          hasPermission: true,
         };
 
         setCurrentProject(recentEntry);
@@ -144,19 +146,31 @@ export function ProjectGate({ children }: ProjectGateProps) {
         // Check if we still have permission
         const permission = await entry.handle.queryPermission();
         if (permission === "granted") {
+          // Update permission status
+          const updatedEntry = { ...entry, hasPermission: true };
+          addToRecentFolders(updatedEntry);
           await handleFolderSelect(entry.handle);
         } else {
           // Try to request permission
           const requestResult = await entry.handle.requestPermission();
           if (requestResult === "granted") {
+            const updatedEntry = { ...entry, hasPermission: true };
+            addToRecentFolders(updatedEntry);
             await handleFolderSelect(entry.handle);
+          } else {
+            // Mark as permission revoked
+            const updatedEntry = { ...entry, hasPermission: false };
+            addToRecentFolders(updatedEntry);
           }
         }
       } catch (err) {
         console.error("Failed to access recent folder:", err);
+        // Mark as permission revoked on error
+        const updatedEntry = { ...entry, hasPermission: false };
+        addToRecentFolders(updatedEntry);
       }
     },
-    [handleFolderSelect]
+    [handleFolderSelect, addToRecentFolders]
   );
 
   // If no project is selected, show project picker
@@ -171,7 +185,7 @@ export function ProjectGate({ children }: ProjectGateProps) {
 
           <button
             onClick={handleSelectFolder}
-            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 transition mb-6"
+            className="w-full bg-neutral-600 text-white px-4 py-3 rounded-lg hover:bg-neutral-700 transition mb-6"
           >
             Select Java Project Folder
           </button>
@@ -188,11 +202,23 @@ export function ProjectGate({ children }: ProjectGateProps) {
               <div className="space-y-2">
                 {recentFolders.map((entry) => (
                   <button
-                    key={entry.path}
+                    key={entry.id}
                     onClick={() => handleRecentFolderClick(entry)}
-                    className="w-full text-left p-3 rounded border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition"
+                    disabled={entry.hasPermission === false}
+                    className={`w-full text-left p-3 rounded border transition ${
+                      entry.hasPermission === false
+                        ? "border-neutral-200 bg-neutral-50 text-neutral-400 cursor-not-allowed"
+                        : "border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50"
+                    }`}
                   >
-                    <div className="font-medium text-sm">{entry.name}</div>
+                    <div className="font-medium text-sm">
+                      {entry.name}
+                      {entry.hasPermission === false && (
+                        <span className="ml-2 text-xs text-neutral-400">
+                          (Permission revoked)
+                        </span>
+                      )}
+                    </div>
                     <div className="text-xs text-neutral-500">
                       {new Date(entry.lastAccessed).toLocaleString()}
                     </div>
@@ -213,6 +239,7 @@ export function ProjectGate({ children }: ProjectGateProps) {
     error,
     refresh,
     currentProject,
+    files,
   };
 
   return (

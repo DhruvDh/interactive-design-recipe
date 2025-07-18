@@ -22,6 +22,52 @@ export interface FileNode {
 }
 
 /**
+ * Build file tree from File[] array
+ */
+export function buildFileTree(files: File[]): FileNode {
+  const root: FileNode = {
+    id: "/",
+    name: "Project",
+    type: "dir",
+    children: [],
+  };
+
+  for (const file of files) {
+    // Use webkitRelativePath if available, otherwise fall back to file.name
+    let filePath = file.webkitRelativePath || file.name;
+
+    // If filePath doesn't contain a slash, it's likely a single file
+    // In this case, we should place it in the root directory
+    if (!filePath.includes("/")) {
+      filePath = file.name;
+    }
+
+    const parts = filePath.split("/").filter((part) => part.trim() !== "");
+    let cursor = root;
+
+    parts.forEach((part, idx) => {
+      const isFile = idx === parts.length - 1;
+      const id = parts.slice(0, idx + 1).join("/");
+      let next = cursor.children!.find((c) => c.name === part);
+
+      if (!next) {
+        next = {
+          id,
+          name: part,
+          type: isFile ? "file" : "dir",
+          children: isFile ? undefined : [],
+        };
+        cursor.children!.push(next);
+      }
+
+      cursor = next;
+    });
+  }
+
+  return root;
+}
+
+/**
  * Hard-coded Design Recipe steps for PoC
  */
 export const recipeSteps: RecipeStepNavItem[] = [
@@ -56,92 +102,3 @@ export const recipeSteps: RecipeStepNavItem[] = [
     route: "/step/5",
   },
 ];
-
-/**
- * Hard-coded project file tree for PoC
- */
-export const projectRoot: FileNode = {
-  id: "project",
-  name: "design-recipe",
-  type: "dir",
-  children: [
-    {
-      id: "project/src",
-      name: "src",
-      type: "dir",
-      children: [
-        {
-          id: "project/src/App.tsx",
-          name: "App.tsx",
-          type: "file",
-        },
-        {
-          id: "project/src/main.tsx",
-          name: "main.tsx",
-          type: "file",
-        },
-        {
-          id: "project/src/index.css",
-          name: "index.css",
-          type: "file",
-        },
-        {
-          id: "project/src/components",
-          name: "components",
-          type: "dir",
-          children: [
-            {
-              id: "project/src/components/layout",
-              name: "layout",
-              type: "dir",
-              children: [
-                {
-                  id: "project/src/components/layout/NavSidebar.tsx",
-                  name: "NavSidebar.tsx",
-                  type: "file",
-                },
-                {
-                  id: "project/src/components/layout/ChatSidebar.tsx",
-                  name: "ChatSidebar.tsx",
-                  type: "file",
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: "project/src/pages",
-          name: "pages",
-          type: "dir",
-          children: [
-            {
-              id: "project/src/pages/Home.tsx",
-              name: "Home.tsx",
-              type: "file",
-            },
-            {
-              id: "project/src/pages/About.tsx",
-              name: "About.tsx",
-              type: "file",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "project/package.json",
-      name: "package.json",
-      type: "file",
-    },
-    {
-      id: "project/tsconfig.json",
-      name: "tsconfig.json",
-      type: "file",
-    },
-    {
-      id: "project/README.md",
-      name: "README.md",
-      type: "file",
-    },
-  ],
-};

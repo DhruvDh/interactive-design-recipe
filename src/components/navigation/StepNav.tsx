@@ -25,7 +25,7 @@ export function StepNav({ steps }: StepNavProps) {
                 cn(
                   "block px-3 py-2 rounded-md transition text-sm",
                   isActive
-                    ? "bg-indigo-600 text-white font-medium"
+                    ? "bg-neutral-600 text-white font-medium"
                     : "text-neutral-800 hover:bg-neutral-200"
                 )
               }

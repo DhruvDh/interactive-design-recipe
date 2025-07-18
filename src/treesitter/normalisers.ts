@@ -5,14 +5,95 @@ import type {
   MethodInfo,
   ConstructorInfo,
   ImportInfo,
+  ParameterInfo,
 } from "./types";
+
+/**
+ * Find the enclosing class for a given Tree-sitter node
+ * by traversing up the syntax tree until we find a class_declaration
+ */
+function findEnclosingClass(
+  node: QueryMatch["captures"][0]["node"]
+): string | null {
+  let n: QueryMatch["captures"][0]["node"] | null = node;
+  while (n && n.type !== "class_declaration") {
+    n = n.parent;
+  }
+  return n?.childForFieldName("name")?.text ?? null;
+}
+
+/**
+ * Find the enclosing interface for a given Tree-sitter node
+ * by traversing up the syntax tree until we find an interface_declaration
+ */
+function findEnclosingInterface(
+  node: QueryMatch["captures"][0]["node"]
+): string | null {
+  let n: QueryMatch["captures"][0]["node"] | null = node;
+  while (n && n.type !== "interface_declaration") {
+    n = n.parent;
+  }
+  return n?.childForFieldName("name")?.text ?? null;
+}
+
+/**
+ * Extract modifiers from Tree-sitter captures
+ */
+function extractModifiers(captures: QueryMatch["captures"]): string[] {
+  const modifiers: string[] = [];
+
+  captures.forEach((capture) => {
+    if (capture.name === "modifiers" || capture.name === "modifier") {
+      // Handle multiple modifiers in one capture
+      const text = capture.node.text;
+      if (text) {
+        // Split by whitespace and filter out empty strings
+        const mods = text.split(/\s+/).filter((mod) => mod.trim());
+        modifiers.push(...mods);
+      }
+    }
+  });
+
+  return modifiers;
+}
+
+/**
+ * Extract parameters from Tree-sitter formal_parameters node
+ */
+function extractParameters(
+  parametersNode: QueryMatch["captures"][0]["node"]
+): ParameterInfo[] {
+  const parameters: ParameterInfo[] = [];
+
+  if (!parametersNode || parametersNode.type !== "formal_parameters") {
+    return parameters;
+  }
+
+  // Iterate through child nodes to find formal_parameter nodes
+  for (let i = 0; i < parametersNode.childCount; i++) {
+    const child = parametersNode.child(i);
+    if (child && child.type === "formal_parameter") {
+      // Extract type and name from formal_parameter
+      const typeNode = child.childForFieldName("type");
+      const nameNode = child.childForFieldName("name");
+
+      if (typeNode && nameNode) {
+        parameters.push({
+          name: nameNode.text,
+          type: typeNode.text,
+        });
+      }
+    }
+  }
+
+  return parameters;
+}
 
 export function initEmptyAnalysis(): DRAnalysis {
   return {
     classes: [],
     interfaces: [],
     imports: [],
-    methods: [],
   };
 }
 
@@ -57,14 +138,16 @@ export function normaliseClassFields(
       const fieldName = nameCapture.node.text;
       const fieldType = typeCapture.node.text;
 
-      // Find the class this field belongs to
-      // For now, assume it's the first class in the file
-      const classInfo = analysis.classes.find((c) => c.path === filePath);
+      // Find the class this field belongs to by traversing up the syntax tree
+      const className = findEnclosingClass(nameCapture.node);
+      const classInfo = analysis.classes.find(
+        (c) => c.path === filePath && c.name === className
+      );
       if (classInfo) {
         const fieldInfo: FieldInfo = {
           name: fieldName,
           type: fieldType,
-          modifiers: [], // TODO: extract modifiers from Tree-sitter
+          modifiers: extractModifiers(match.captures),
         };
 
         // Avoid duplicates
@@ -86,19 +169,28 @@ export function normaliseClassMethods(
     const returnTypeCapture = match.captures.find(
       (c) => c.name === "return_type"
     );
+    const parametersCapture = match.captures.find(
+      (c) => c.name === "parameters"
+    );
 
     if (nameCapture) {
       const methodName = nameCapture.node.text;
       const returnType = returnTypeCapture?.node.text || "void";
+      const parameters = parametersCapture
+        ? extractParameters(parametersCapture.node)
+        : [];
 
-      // Find the class this method belongs to
-      const classInfo = analysis.classes.find((c) => c.path === filePath);
+      // Find the class this method belongs to by traversing up the syntax tree
+      const className = findEnclosingClass(nameCapture.node);
+      const classInfo = analysis.classes.find(
+        (c) => c.path === filePath && c.name === className
+      );
       if (classInfo) {
         const methodInfo: MethodInfo = {
           name: methodName,
           returnType: returnType,
-          parameters: [], // TODO: extract parameters
-          modifiers: [], // TODO: extract modifiers
+          parameters: parameters,
+          modifiers: extractModifiers(match.captures),
         };
 
         // Avoid duplicates
@@ -115,13 +207,29 @@ export function normaliseClassConstructors(
   filePath: string,
   analysis: DRAnalysis
 ): void {
-  matches.forEach(() => {
+  matches.forEach((match) => {
+    const parametersCapture = match.captures.find(
+      (c) => c.name === "parameters"
+    );
+    const nameCapture = match.captures.find((c) => c.name === "name");
+
     // Find the class this constructor belongs to
-    const classInfo = analysis.classes.find((c) => c.path === filePath);
+    const className = nameCapture
+      ? nameCapture.node.text
+      : findEnclosingClass(match.captures[0].node);
+
+    const classInfo = analysis.classes.find(
+      (c) => c.path === filePath && c.name === className
+    );
+
     if (classInfo) {
+      const parameters = parametersCapture
+        ? extractParameters(parametersCapture.node)
+        : [];
+
       const constructorInfo: ConstructorInfo = {
-        parameters: [], // TODO: extract parameters
-        modifiers: [], // TODO: extract modifiers
+        parameters: parameters,
+        modifiers: extractModifiers(match.captures),
       };
 
       classInfo.constructors.push(constructorInfo);
@@ -166,26 +274,69 @@ export function normaliseInterfaceMethods(
     const returnTypeCapture = match.captures.find(
       (c) => c.name === "return_type"
     );
+    const parametersCapture = match.captures.find(
+      (c) => c.name === "parameters"
+    );
 
     if (nameCapture) {
       const methodName = nameCapture.node.text;
       const returnType = returnTypeCapture?.node.text || "void";
+      const parameters = parametersCapture
+        ? extractParameters(parametersCapture.node)
+        : [];
 
       // Find the interface this method belongs to
+      const interfaceName = findEnclosingInterface(nameCapture.node);
       const interfaceInfo = analysis.interfaces.find(
-        (i) => i.path === filePath
+        (i) => i.path === filePath && i.name === interfaceName
       );
+
       if (interfaceInfo) {
         const methodInfo: MethodInfo = {
           name: methodName,
           returnType: returnType,
-          parameters: [], // TODO: extract parameters
-          modifiers: [], // TODO: extract modifiers
+          parameters: parameters,
+          modifiers: extractModifiers(match.captures),
         };
 
         // Avoid duplicates
         if (!interfaceInfo.methods.some((m) => m.name === methodName)) {
           interfaceInfo.methods.push(methodInfo);
+        }
+      }
+    }
+  });
+}
+
+export function normaliseInterfaceConstants(
+  matches: QueryMatch[],
+  filePath: string,
+  analysis: DRAnalysis
+): void {
+  matches.forEach((match) => {
+    const nameCapture = match.captures.find((c) => c.name === "name");
+    const typeCapture = match.captures.find((c) => c.name === "type");
+
+    if (nameCapture && typeCapture) {
+      const constantName = nameCapture.node.text;
+      const constantType = typeCapture.node.text;
+
+      // Find the interface this constant belongs to
+      const interfaceName = findEnclosingInterface(nameCapture.node);
+      const interfaceInfo = analysis.interfaces.find(
+        (i) => i.path === filePath && i.name === interfaceName
+      );
+
+      if (interfaceInfo) {
+        const constantInfo: FieldInfo = {
+          name: constantName,
+          type: constantType,
+          modifiers: extractModifiers(match.captures),
+        };
+
+        // Avoid duplicates
+        if (!interfaceInfo.constants.some((c) => c.name === constantName)) {
+          interfaceInfo.constants.push(constantInfo);
         }
       }
     }
@@ -198,20 +349,22 @@ export function normaliseImports(
   analysis: DRAnalysis
 ): void {
   matches.forEach((match) => {
-    const importCapture = match.captures.find((c) => c.name === "import");
-    if (importCapture) {
-      const importText = importCapture.node.text;
+    const importPathCapture = match.captures.find(
+      (c) => c.name === "import_path"
+    );
+    const asteriskCapture = match.captures.find((c) => c.name === "asterisk");
+    const modifiersCapture = match.captures.find((c) => c.name === "modifiers");
 
-      // Parse import statement
-      const isStatic = importText.includes("static");
-      const isWildcard = importText.includes("*");
+    if (importPathCapture) {
+      const importPath = importPathCapture.node.text;
+      const isWildcard = !!asteriskCapture;
+      const isStatic = modifiersCapture?.node.text.includes("static") || false;
 
       // Extract package and class name
-      const parts = importText
-        .replace(/import\s+(static\s+)?/, "")
-        .replace(/;$/, "")
-        .split(".");
-      const packageName = parts.slice(0, -1).join(".");
+      const parts = importPath.split(".");
+      const packageName = isWildcard
+        ? importPath
+        : parts.slice(0, -1).join(".");
       const className = isWildcard ? undefined : parts[parts.length - 1];
 
       const importInfo: ImportInfo = {
@@ -245,5 +398,6 @@ export const normalisers = {
   "class_constructors.scm": normaliseClassConstructors,
   "interface_name.scm": normaliseInterfaceName,
   "interface_methods.scm": normaliseInterfaceMethods,
+  "interface_constants.scm": normaliseInterfaceConstants,
   "import.scm": normaliseImports,
 } as const;

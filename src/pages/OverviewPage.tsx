@@ -9,7 +9,7 @@ export default function OverviewPage() {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 border-t-neutral-600 mx-auto mb-4"></div>
           <p className="text-neutral-600">Analyzing your Java project...</p>
         </div>
       </div>
@@ -28,7 +28,7 @@ export default function OverviewPage() {
             <p className="text-neutral-600 mb-6">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+              className="bg-neutral-600 text-white px-4 py-2 rounded-lg hover:bg-neutral-700 transition"
             >
               Try Again
             </button>
@@ -85,27 +85,27 @@ export default function OverviewPage() {
               <h2 className="text-xl font-semibold mb-4">What You'll Do</h2>
               <div className="space-y-2 text-sm">
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">0.</span>
+                  <span className="text-neutral-700 font-bold">0.</span>
                   <span>Restate the Problem</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">1.</span>
+                  <span className="text-neutral-700 font-bold">1.</span>
                   <span>Data Definition</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">2.</span>
+                  <span className="text-neutral-700 font-bold">2.</span>
                   <span>Signature & Purpose</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">3.</span>
+                  <span className="text-neutral-700 font-bold">3.</span>
                   <span>Examples & Tests</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">4.</span>
+                  <span className="text-neutral-700 font-bold">4.</span>
                   <span>Template</span>
                 </div>
                 <div className="flex items-start gap-2">
-                  <span className="text-indigo-600 font-bold">5.</span>
+                  <span className="text-neutral-700 font-bold">5.</span>
                   <span>Implementation</span>
                 </div>
               </div>
@@ -144,7 +144,7 @@ export default function OverviewPage() {
             </p>
             <button
               onClick={handleStartDesignRecipe}
-              className="bg-indigo-600 text-white px-8 py-3 rounded-lg hover:bg-indigo-700 transition font-medium"
+              className="bg-neutral-600 text-white px-8 py-3 rounded-lg hover:bg-neutral-700 transition font-medium"
             >
               Start Step 0 — Restate the Problem
             </button>
