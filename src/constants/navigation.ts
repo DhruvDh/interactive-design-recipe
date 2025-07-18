@@ -1,15 +1,74 @@
+import { canonical } from "../utils/paths";
+
 /**
- * One item in the Design‑Recipe navigation list.
- *
- * @property id   Stable key, e.g. "step0"
- * @property name Human‑readable label, e.g. "Step 0 — Restate the Problem"
- * @property route React‑Router path segment: "/step/0"
+ * Navigation item for the timeline-based Design Recipe flow.
  */
-export interface RecipeStepNavItem {
-  id: string;
-  name: string;
-  route: string;
+export interface NavItem {
+  id: string; // stable key
+  name: string; // sidebar label
+  route: string; // react‑router path
+  category: "project" | "recipe" | "final";
 }
+
+/** Timeline in desired visual order */
+export const navItems: NavItem[] = [
+  {
+    id: "select",
+    name: "Select Project",
+    route: "/select",
+    category: "project",
+  },
+  {
+    id: "overview",
+    name: "Project Overview",
+    route: "/overview",
+    category: "project",
+  },
+
+  {
+    id: "step0",
+    name: "Step 0 — Restate",
+    route: "/step/0",
+    category: "recipe",
+  },
+  {
+    id: "step1",
+    name: "Step 1 — Data Definitions",
+    route: "/step/1",
+    category: "recipe",
+  },
+  {
+    id: "step2",
+    name: "Step 2 — Signature & Purpose",
+    route: "/step/2",
+    category: "recipe",
+  },
+  {
+    id: "step3",
+    name: "Step 3 — Examples & Tests",
+    route: "/step/3",
+    category: "recipe",
+  },
+  {
+    id: "step4",
+    name: "Step 4 — Skeleton",
+    route: "/step/4",
+    category: "recipe",
+  },
+  {
+    id: "step5",
+    name: "Step 5 — Implementation Notes",
+    route: "/step/5",
+    category: "recipe",
+  },
+
+  {
+    id: "final",
+    name: "Finalise Submission",
+    route: "/finalise",
+    category: "final",
+  },
+] as const;
 
 /**
  * File tree node for project explorer.
@@ -33,22 +92,18 @@ export function buildFileTree(files: File[]): FileNode {
   };
 
   for (const file of files) {
-    // Use webkitRelativePath if available, otherwise fall back to file.name
-    let filePath = file.webkitRelativePath || file.name;
+    // Use canonical path from utility
+    const filePath = canonical(file);
 
-    // If filePath doesn't contain a slash, it's likely a single file
-    // In this case, we should place it in the root directory
-    if (!filePath.includes("/")) {
-      filePath = file.name;
-    }
-
-    const parts = filePath.split("/").filter((part) => part.trim() !== "");
+    const parts = filePath
+      .split("/")
+      .filter((part: string) => part.trim() !== "");
     let cursor = root;
 
-    parts.forEach((part, idx) => {
+    parts.forEach((part: string, idx: number) => {
       const isFile = idx === parts.length - 1;
       const id = parts.slice(0, idx + 1).join("/");
-      let next = cursor.children!.find((c) => c.name === part);
+      let next = cursor.children!.find((c: FileNode) => c.name === part);
 
       if (!next) {
         next = {
@@ -67,38 +122,10 @@ export function buildFileTree(files: File[]): FileNode {
   return root;
 }
 
-/**
- * Hard-coded Design Recipe steps for PoC
- */
-export const recipeSteps: RecipeStepNavItem[] = [
-  {
-    id: "step0",
-    name: "Step 0 — Restate the Problem",
-    route: "/step/0",
-  },
-  {
-    id: "step1",
-    name: "Step 1 — Data Definition",
-    route: "/step/1",
-  },
-  {
-    id: "step2",
-    name: "Step 2 — Signature & Purpose",
-    route: "/step/2",
-  },
-  {
-    id: "step3",
-    name: "Step 3 — Examples & Tests",
-    route: "/step/3",
-  },
-  {
-    id: "step4",
-    name: "Step 4 — Template",
-    route: "/step/4",
-  },
-  {
-    id: "step5",
-    name: "Step 5 — Implementation",
-    route: "/step/5",
-  },
-];
+// Keep the old interface for backwards compatibility during transition
+export type RecipeStepNavItem = NavItem;
+
+// Export the old recipeSteps array for backwards compatibility
+export const recipeSteps = navItems.filter(
+  (item) => item.category === "recipe"
+);

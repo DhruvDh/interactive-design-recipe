@@ -187,7 +187,7 @@ export function FileTree({ root, onOpenFile }: FileTreeProps) {
   };
 
   return (
-    <div>
+    <div data-testid="file-tree">
       <h2 className="text-sm font-medium text-neutral-600 mb-3">Files</h2>
       <div role="tree" className="space-y-1">
         <FileNodeItem

@@ -7,33 +7,27 @@ export default function OverviewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 border-t-neutral-600 mx-auto mb-4"></div>
-          <p className="text-neutral-600">Analyzing your Java project...</p>
-        </div>
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-neutral-300 border-t-neutral-600 mx-auto mb-4"></div>
+        <p className="text-neutral-600">Analyzing your Java project...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-neutral-50 flex items-center justify-center">
-        <div className="max-w-md w-full mx-auto p-6 bg-white rounded-lg shadow-lg">
-          <div className="text-center">
-            <div className="text-red-500 mb-4">⚠️</div>
-            <h1 className="text-xl font-bold text-red-600 mb-4">
-              Analysis Error
-            </h1>
-            <p className="text-neutral-600 mb-6">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="bg-neutral-600 text-white px-4 py-2 rounded-lg hover:bg-neutral-700 transition"
-            >
-              Try Again
-            </button>
-          </div>
-        </div>
+      <div className="text-center">
+        <div className="text-red-500 mb-4">⚠️</div>
+        <h1 className="text-xl font-bold text-red-600 mb-4">
+          Analysis Error
+        </h1>
+        <p className="text-neutral-600 mb-6">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-neutral-600 text-white px-4 py-2 rounded-lg hover:bg-neutral-700 transition"
+        >
+          Try Again
+        </button>
       </div>
     );
   }
@@ -43,9 +37,7 @@ export default function OverviewPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50">
-      <div className="max-w-4xl mx-auto p-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
+    <>
           <h1 className="text-3xl font-bold text-center mb-8">
             Project Overview
           </h1>
@@ -138,19 +130,17 @@ export default function OverviewPage() {
             </div>
           )}
 
-          <div className="text-center">
-            <p className="text-neutral-600 mb-6">
-              Ready to apply systematic program design to your Java project?
-            </p>
-            <button
-              onClick={handleStartDesignRecipe}
-              className="bg-neutral-600 text-white px-8 py-3 rounded-lg hover:bg-neutral-700 transition font-medium"
-            >
-              Start Step 0 — Restate the Problem
-            </button>
-          </div>
+        <div className="text-center">
+          <p className="text-neutral-600 mb-6">
+            Ready to apply systematic program design to your Java project?
+          </p>
+          <button
+            onClick={handleStartDesignRecipe}
+            className="bg-neutral-600 text-white px-8 py-3 rounded-lg hover:bg-neutral-700 transition font-medium"
+          >
+            Start Step 0 — Restate the Problem
+          </button>
         </div>
-      </div>
-    </div>
-  );
-}
+      </>
+    );
+  }

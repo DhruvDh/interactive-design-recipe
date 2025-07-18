@@ -1,6 +1,6 @@
-import { StepNav } from "../navigation/StepNav";
+import { TimelineNav } from "../navigation/TimelineNav";
 import { FileTree } from "../navigation/FileTree";
-import { recipeSteps, buildFileTree } from "../../constants/navigation";
+import { buildFileTree } from "../../constants/navigation";
 import { useAnalysisContext } from "../../contexts/AnalysisContext";
 
 export interface NavSidebarProps {
@@ -15,8 +15,8 @@ export default function NavSidebar({ onOpenFile }: NavSidebarProps) {
 
   return (
     <aside className="bg-neutral-100 text-neutral-800 p-4 flex flex-col gap-6 overflow-y-auto">
-      {/* 1. Design-Recipe Steps */}
-      <StepNav steps={recipeSteps} />
+      {/* 1. Design-Recipe Timeline */}
+      <TimelineNav />
 
       <hr className="border-neutral-300" />
 

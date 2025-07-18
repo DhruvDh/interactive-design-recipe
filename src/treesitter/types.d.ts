@@ -11,6 +11,7 @@ export interface ClassInfo {
   fields: FieldInfo[];
   methods: MethodInfo[];
   constructors: ConstructorInfo[];
+  javadoc?: string;
 }
 
 export interface InterfaceInfo {
@@ -18,12 +19,14 @@ export interface InterfaceInfo {
   path: string;
   methods: MethodInfo[];
   constants: FieldInfo[];
+  javadoc?: string;
 }
 
 export interface FieldInfo {
   name: string;
   type: string;
   modifiers: string[];
+  javadoc?: string;
 }
 
 export interface MethodInfo {
@@ -32,12 +35,14 @@ export interface MethodInfo {
   parameters: ParameterInfo[];
   modifiers: string[];
   body?: string;
+  javadoc?: string;
 }
 
 export interface ConstructorInfo {
   parameters: ParameterInfo[];
   modifiers: string[];
   body?: string;
+  javadoc?: string;
 }
 
 export interface ParameterInfo {

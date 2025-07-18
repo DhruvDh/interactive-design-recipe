@@ -1,243 +1,187 @@
-import { useState } from "react";
+import { useDoc, useYText } from "../hooks/useYjs";
+import { useUndo } from "../hooks/useUndoManager";
+import { useAnalysisContext } from "../contexts/AnalysisContext";
 
 export default function Step5() {
-  const [implementation, setImplementation] = useState("");
-  const [testResults, setTestResults] = useState("");
+  const { analysis } = useAnalysisContext();
+  const doc = useDoc("step5");
+  const undoManager = useUndo(doc ? [doc.getText("implementation")] : null);
+
+  const [notes, setNotes] = useYText(doc, "notes");
 
   return (
     <div className="p-8">
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-neutral-900 mb-8">
-          Step 5 — Implementation
-        </h1>
-
-        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 mb-8">
-          <div className="prose prose-neutral max-w-none mb-6">
-            <p className="text-neutral-700 mb-4">
-              <strong>Purpose:</strong> Fill in the template with actual code
-              that implements the function logic, then test it against your
-              examples.
-            </p>
-
-            <div className="bg-neutral-50 p-4 rounded-lg border-l-4 border-neutral-400">
-              <p className="text-sm text-neutral-600 mb-2">
-                <strong>Implementation process:</strong>
-              </p>
-              <ol className="text-sm text-neutral-600 list-decimal list-inside space-y-1">
-                <li>Start with your template from Step 4</li>
-                <li>Replace the ... placeholders with actual code</li>
-                <li>Implement helper functions if needed</li>
-                <li>Run your tests to verify correctness</li>
-                <li>Refine and debug as necessary</li>
-              </ol>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <label
-                htmlFor="implementation"
-                className="block text-sm font-medium text-neutral-700 mb-2"
-              >
-                Implementation Code
-              </label>
-              <textarea
-                id="implementation"
-                value={implementation}
-                onChange={(e) => setImplementation(e.target.value)}
-                rows={20}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:ring-neutral-500 focus:border-neutral-500 text-sm font-mono"
-                placeholder='public ReturnType methodName(ParameterType parameter) {
-    // Your implementation here
-    
-    // Example structure:
-    // 1. Handle edge cases
-    if (parameter == null) {
-        throw new IllegalArgumentException("Parameter cannot be null");
-    }
-    
-    // 2. Main logic
-    // ... your implementation ...
-    
-    // 3. Return result
-    return result;
-}
-
-// Helper methods (if needed)
-private HelperReturnType helperMethod(HelperParameterType param) {
-    // Helper implementation
-    return helperResult;
-}'
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="test-results"
-                className="block text-sm font-medium text-neutral-700 mb-2"
-              >
-                Test Results
-              </label>
-              <textarea
-                id="test-results"
-                value={testResults}
-                onChange={(e) => setTestResults(e.target.value)}
-                rows={10}
-                className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:ring-neutral-500 focus:border-neutral-500 text-sm font-mono"
-                placeholder='Paste your test execution results here...
-
-Example:
-✓ testMyFunction_TypicalCase PASSED
-✓ testMyFunction_EmptyString PASSED
-✓ testMyFunction_ZeroCount PASSED
-✓ testMyFunction_NegativeCount PASSED
-
-All tests passed! ✅
-
-OR if there are failures:
-✗ testMyFunction_TypicalCase FAILED
-  Expected: "hellohellohello"
-  Actual: "hello"
-  
-Fix: Check the loop condition in the implementation'
-              />
-            </div>
-          </div>
-
-          <div className="mt-6 flex justify-between items-center">
-            <div className="text-sm text-neutral-500">
-              Implementation: {implementation.length} characters | Test Results:{" "}
-              {testResults.length} characters
-            </div>
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-3xl font-bold text-neutral-900">
+            Step 5 — Implementation Notes
+          </h1>
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => {
-                setImplementation("");
-                setTestResults("");
-              }}
-              className="px-4 py-2 text-sm text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-md transition"
+              onClick={() => undoManager?.undo()}
+              disabled={!undoManager}
+              className="px-3 py-1 text-sm bg-neutral-200 hover:bg-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
             >
-              Clear All
+              Undo
+            </button>
+            <button
+              onClick={() => undoManager?.redo()}
+              disabled={!undoManager}
+              className="px-3 py-1 text-sm bg-neutral-200 hover:bg-neutral-300 disabled:opacity-50 disabled:cursor-not-allowed rounded"
+            >
+              Redo
             </button>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-neutral-50 rounded-lg p-6 border border-neutral-200">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-              Implementation Tips
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600">💡</span>
-                <span className="text-neutral-700">
-                  Start simple - implement the basic case first
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600">💡</span>
-                <span className="text-neutral-700">
-                  Use meaningful variable names
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600">💡</span>
-                <span className="text-neutral-700">
-                  Add comments for complex logic
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600">💡</span>
-                <span className="text-neutral-700">
-                  Handle edge cases explicitly
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-blue-600">💡</span>
-                <span className="text-neutral-700">
-                  Test frequently as you develop
-                </span>
-              </div>
-            </div>
-          </div>
+        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 mb-8">
+          <div className="prose prose-neutral max-w-none mb-6">
+            <p className="text-neutral-700 mb-4">
+              <strong>Purpose:</strong> Document insights, challenges, and
+              decisions made during implementation. This sprint focuses on
+              planning — actual coding happens in your IDE.
+            </p>
 
-          <div className="bg-neutral-50 rounded-lg p-6 border border-neutral-200">
-            <h2 className="text-lg font-semibold text-neutral-900 mb-4">
-              Testing & Debugging
-            </h2>
-            <div className="space-y-3 text-sm">
-              <div className="flex items-start gap-2">
-                <span className="text-green-600">🔍</span>
-                <span className="text-neutral-700">
-                  Run tests after each change
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-600">🔍</span>
-                <span className="text-neutral-700">
-                  Use print statements to debug
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-600">🔍</span>
-                <span className="text-neutral-700">
-                  Check boundary conditions
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-600">🔍</span>
-                <span className="text-neutral-700">
-                  Verify with additional examples
-                </span>
-              </div>
-              <div className="flex items-start gap-2">
-                <span className="text-green-600">🔍</span>
-                <span className="text-neutral-700">
-                  Consider performance implications
-                </span>
-              </div>
+            <p className="text-neutral-700 mb-4">
+              Use this space to record implementation notes, considerations, and
+              reminders for when you write the actual code in your Java
+              development environment.
+            </p>
+
+            <div className="bg-neutral-50 p-4 rounded-lg border-l-4 border-neutral-400">
+              <p className="text-sm text-neutral-600 mb-2">
+                <strong>Good implementation notes include:</strong>
+              </p>
+              <ul className="text-sm text-neutral-600 list-disc list-inside">
+                <li>Algorithm choices and trade-offs</li>
+                <li>Performance considerations</li>
+                <li>Edge cases to handle carefully</li>
+                <li>Helper methods that might be needed</li>
+                <li>Testing strategies</li>
+                <li>Refactoring opportunities</li>
+              </ul>
             </div>
           </div>
         </div>
 
-        <div className="mt-6 bg-green-50 rounded-lg p-6 border border-green-200">
-          <h2 className="text-lg font-semibold text-green-900 mb-4">
-            🎉 Congratulations!
+        <div className="bg-white rounded-lg shadow-sm border border-neutral-200 p-6 mb-8">
+          <div className="space-y-4">
+            <label
+              htmlFor="implementation-notes"
+              className="block text-sm font-medium text-neutral-700"
+            >
+              Implementation Notes
+            </label>
+            <textarea
+              id="implementation-notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={15}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-md shadow-sm focus:ring-neutral-500 focus:border-neutral-500 text-sm"
+              placeholder="Write your implementation notes here...
+
+Example notes:
+- Algorithm: Using binary search for O(log n) lookup
+- Edge cases: Handle null inputs and empty arrays
+- Performance: Consider caching results for repeated queries
+- Testing: Need to verify behavior with negative numbers
+- Refactoring: Extract validation logic into helper method
+- Dependencies: Requires Apache Commons for string utilities"
+            />
+          </div>
+
+          <div className="mt-6 flex justify-between items-center">
+            <div className="text-sm text-neutral-500">
+              {notes.length} characters
+            </div>
+            <button
+              onClick={() => setNotes("")}
+              className="px-4 py-2 text-sm text-neutral-600 hover:text-neutral-800 hover:bg-neutral-100 rounded-md transition"
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-neutral-50 rounded-lg p-6 border border-neutral-200">
+          <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+            Implementation Workflow
           </h2>
-          <p className="text-green-800 mb-4">
-            You've completed the Design Recipe process! By following these
-            systematic steps, you've:
-          </p>
-          <div className="space-y-2 text-sm text-green-700">
+          <div className="space-y-3 text-sm">
             <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Clearly understood the problem</span>
+              <span className="text-neutral-600 font-bold">1.</span>
+              <span className="text-neutral-700">
+                <strong>Review your design:</strong> Check Steps 0-4 to ensure
+                your plan is solid
+              </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Analyzed the data structures involved</span>
+              <span className="text-neutral-600 font-bold">2.</span>
+              <span className="text-neutral-700">
+                <strong>Set up your IDE:</strong> Create the Java classes and
+                methods identified in your analysis
+              </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Defined a clear function signature and purpose</span>
+              <span className="text-neutral-600 font-bold">3.</span>
+              <span className="text-neutral-700">
+                <strong>Implement incrementally:</strong> Start with the
+                skeleton from Step 4 and fill in each section
+              </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Created comprehensive examples and tests</span>
+              <span className="text-neutral-600 font-bold">4.</span>
+              <span className="text-neutral-700">
+                <strong>Test continuously:</strong> Run your JUnit tests from
+                Step 3 after each major change
+              </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Designed a systematic template</span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-green-600">✓</span>
-              <span>Implemented and tested your solution</span>
+              <span className="text-neutral-600 font-bold">5.</span>
+              <span className="text-neutral-700">
+                <strong>Refine and iterate:</strong> Update your notes here as
+                you discover new insights
+              </span>
             </div>
           </div>
-          <p className="text-green-800 mt-4 text-sm">
-            This systematic approach helps ensure your code is correct,
-            maintainable, and well-tested!
-          </p>
         </div>
+
+        {analysis && (
+          <div className="mt-8 bg-white rounded-lg shadow-sm border border-neutral-200 p-6">
+            <h2 className="text-lg font-semibold text-neutral-900 mb-4">
+              Project Context
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="bg-neutral-50 p-3 rounded border">
+                <div className="font-medium text-neutral-700">
+                  Classes to implement
+                </div>
+                <div className="text-2xl font-bold text-neutral-900">
+                  {analysis.classes.length}
+                </div>
+              </div>
+              <div className="bg-neutral-50 p-3 rounded border">
+                <div className="font-medium text-neutral-700">
+                  Methods to implement
+                </div>
+                <div className="text-2xl font-bold text-neutral-900">
+                  {analysis.classes.reduce(
+                    (sum, cls) => sum + cls.methods.length,
+                    0
+                  )}
+                </div>
+              </div>
+              <div className="bg-neutral-50 p-3 rounded border">
+                <div className="font-medium text-neutral-700">
+                  Interfaces to implement
+                </div>
+                <div className="text-2xl font-bold text-neutral-900">
+                  {analysis.interfaces.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

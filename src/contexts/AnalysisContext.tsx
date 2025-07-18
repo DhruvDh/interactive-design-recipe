@@ -9,6 +9,7 @@ export interface AnalysisContextType {
   refresh: (files: File[]) => Promise<void>;
   currentProject: RecentEntry | null;
   files: File[];
+  handleFolderSelect: (dirHandle: FileSystemDirectoryHandle) => Promise<void>;
 }
 
 export const AnalysisContext = createContext<AnalysisContextType | null>(null);

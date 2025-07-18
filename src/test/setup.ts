@@ -1,5 +1,6 @@
 // Test setup file
 import { beforeAll } from "vitest";
+import "@testing-library/jest-dom";
 
 // Mock crypto for test environment
 if (!globalThis.crypto) {

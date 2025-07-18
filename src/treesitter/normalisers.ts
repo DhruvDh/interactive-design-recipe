@@ -58,6 +58,20 @@ function extractModifiers(captures: QueryMatch["captures"]): string[] {
 }
 
 /**
+ * Extract Javadoc comment from a node by looking for preceding block comments
+ */
+function extractJavadoc(node: QueryMatch["captures"][0]["node"]): string | undefined {
+  let current = node.previousSibling;
+  while (current && current.type.match(/^(line_comment|block_comment)$/)) {
+    if (current.type === "block_comment" && current.text.startsWith("/**")) {
+      return current.text;
+    }
+    current = current.previousSibling;
+  }
+  return undefined;
+}
+
+/**
  * Extract parameters from Tree-sitter formal_parameters node
  */
 function extractParameters(
@@ -118,6 +132,7 @@ export function normaliseClassName(
           fields: [],
           methods: [],
           constructors: [],
+          javadoc: extractJavadoc(nameCapture.node),
         };
         analysis.classes.push(classInfo);
       }
@@ -148,6 +163,7 @@ export function normaliseClassFields(
           name: fieldName,
           type: fieldType,
           modifiers: extractModifiers(match.captures),
+          javadoc: extractJavadoc(nameCapture.node),
         };
 
         // Avoid duplicates
@@ -191,6 +207,7 @@ export function normaliseClassMethods(
           returnType: returnType,
           parameters: parameters,
           modifiers: extractModifiers(match.captures),
+          javadoc: extractJavadoc(nameCapture.node),
         };
 
         // Avoid duplicates
@@ -230,6 +247,7 @@ export function normaliseClassConstructors(
       const constructorInfo: ConstructorInfo = {
         parameters: parameters,
         modifiers: extractModifiers(match.captures),
+        javadoc: nameCapture ? extractJavadoc(nameCapture.node) : undefined,
       };
 
       classInfo.constructors.push(constructorInfo);
@@ -257,6 +275,7 @@ export function normaliseInterfaceName(
           path: filePath,
           methods: [],
           constants: [],
+          javadoc: extractJavadoc(nameCapture.node),
         };
         analysis.interfaces.push(interfaceInfo);
       }
@@ -297,6 +316,7 @@ export function normaliseInterfaceMethods(
           returnType: returnType,
           parameters: parameters,
           modifiers: extractModifiers(match.captures),
+          javadoc: extractJavadoc(nameCapture.node),
         };
 
         // Avoid duplicates
@@ -332,6 +352,7 @@ export function normaliseInterfaceConstants(
           name: constantName,
           type: constantType,
           modifiers: extractModifiers(match.captures),
+          javadoc: extractJavadoc(nameCapture.node),
         };
 
         // Avoid duplicates

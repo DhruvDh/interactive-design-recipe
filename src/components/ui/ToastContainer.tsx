@@ -16,7 +16,7 @@ export function ToastContainer() {
             px-4 py-3 rounded-lg shadow-lg border max-w-sm
             ${
               toast.type === "info"
-                ? "bg-blue-50 border-blue-200 text-blue-800"
+                ? "bg-neutral-50 border-neutral-200 text-neutral-800"
                 : ""
             }
             ${
