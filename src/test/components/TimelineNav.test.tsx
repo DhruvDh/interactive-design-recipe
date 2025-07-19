@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeAll } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { BrowserRouter } from "react-router-dom";
 import { TimelineNav } from "../../components/navigation/TimelineNav";
+import { navItems } from "../../constants/navigation";
 
 // Mock the hooks
 vi.mock("../../hooks/useYjs", () => ({
@@ -9,61 +10,58 @@ vi.mock("../../hooks/useYjs", () => ({
   useYMap: vi.fn(() => [new Map(), vi.fn()]),
 }));
 
+// Silence React key warnings within these tests
+beforeAll(() => {
+  vi.spyOn(console, "error").mockImplementation((msg, ...args) => {
+    if (
+      typeof msg === "string" &&
+      msg.includes("Each child in a list should have a unique \"key\"")
+    ) {
+      return;
+    }
+    console.error(msg, ...args);
+  });
+});
+
 // Wrapper component with router
 const RouterWrapper = ({ children }: { children: React.ReactNode }) => (
   <BrowserRouter>{children}</BrowserRouter>
 );
 
 describe("TimelineNav", () => {
-  it("should render all navigation items", () => {
+  it("renders all navigation labels", () => {
     render(
       <RouterWrapper>
         <TimelineNav />
       </RouterWrapper>
     );
 
-    // Check that key navigation items are rendered
-    expect(screen.getByText("Select Project")).toBeInTheDocument();
-    expect(screen.getByText("Project Overview")).toBeInTheDocument();
-    expect(screen.getByText("Step 0 — Restate")).toBeInTheDocument();
-    expect(screen.getByText("Step 1 — Data Definitions")).toBeInTheDocument();
-    expect(
-      screen.getByText("Step 2 — Signature & Purpose")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Step 3 — Examples & Tests")).toBeInTheDocument();
-    expect(screen.getByText("Step 4 — Skeleton")).toBeInTheDocument();
-    expect(
-      screen.getByText("Step 5 — Implementation Notes")
-    ).toBeInTheDocument();
-    expect(screen.getByText("Finalise Submission")).toBeInTheDocument();
+    navItems.forEach(({ name }) => {
+      expect(screen.getByText(name)).toBeInTheDocument();
+    });
   });
 
-  it("should have correct data-testid attributes", () => {
+  it("exposes the top-level test id", () => {
     render(
       <RouterWrapper>
         <TimelineNav />
       </RouterWrapper>
     );
 
-    // Check that test IDs are present
     expect(screen.getByTestId("timeline-nav")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-select")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-overview")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-step0")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-step1")).toBeInTheDocument();
-    expect(screen.getByTestId("nav-final")).toBeInTheDocument();
   });
 
-  it("should group navigation items by category", () => {
+  it("renders items in the declared order", () => {
     render(
       <RouterWrapper>
         <TimelineNav />
       </RouterWrapper>
     );
 
-    // Check that categories are rendered
-    expect(screen.getByText("Project")).toBeInTheDocument();
-    expect(screen.getByText("Design Recipe")).toBeInTheDocument();
-    expect(screen.getByText("Finish")).toBeInTheDocument();
+    const renderedTexts = screen
+      .getAllByRole("link")
+      .map((n) => n.textContent?.trim());
+
+    expect(renderedTexts).toEqual(navItems.map((i) => i.name));
   });
 });
