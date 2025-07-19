@@ -43,12 +43,11 @@
 The **agent MUST run these exact commands** (they are fast and deterministic):
 
 ```bash
-# 1) Use the recommended universal image defaults (Node 18‑LTS included).
-# 2) Then:
 pnpm install         # installs & links dependencies
 pnpm run typecheck   # `tsc --noEmit` must pass
 pnpm run lint        # ESLint + Prettier – must return 0
 pnpm run test        # Vitest unit tests – must return 0
+pnpm run test:e2e    # Playwright E2E tests – must return 0
 ```
 
 *If your workspace does not support **pnpm**, fall back to `npm ci` / `npm test` – behaviour is identical.*
@@ -59,6 +58,7 @@ pnpm run test        # Vitest unit tests – must return 0
 | --------------------- | ------------ | ----------------------------- |
 | `pnpm`                | ≥ 8          | deterministic, monorepo‑ready |
 | `vitest`              | via dev‑deps | fast TS‑aware tests           |
+| `playwright`          | via dev‑deps | E2E browser tests             |
 | `eslint` & `prettier` | via dev‑deps | style & formatting            |
 
 ---
@@ -70,6 +70,8 @@ pnpm run test        # Vitest unit tests – must return 0
   The agent MUST run `pnpm run lint --fix` before proposing changes.
 * **Vitest**: unit/component tests live in `src/**/*.test.(ts|tsx)`.
   New or refactored code **requires corresponding tests**.
+* **Playwright**: E2E tests live in `tests/e2e/`.  
+  These **must pass** before any PR is created.
 
 ---
 
@@ -92,7 +94,7 @@ pnpm run test        # Vitest unit tests – must return 0
 
 ## 5 Validation workflow for the agent
 
-The agent should follow *exactly* this sequence when executing a **Code‑mode** task:
+The agent **MUST** follow *exactly* this sequence for any **Code‑mode** task:
 
 1. **Clone + install**
 
@@ -105,13 +107,23 @@ The agent should follow *exactly* this sequence when executing a **Code‑mode**
    pnpm run typecheck
    pnpm run lint
    pnpm run test
+   pnpm run test:e2e
    ```
 
    Abort if any fail before making changes.
 3. **Apply edits / generate code** in a local branch **without touching `package.json`** unless the task explicitly requires new deps.
-4. **Re‑run the gates** (type, lint, test) until green.
+4. **Re‑run the gates** (type, lint, test, E2E) until green:
+
+   ```bash
+   pnpm run typecheck
+   pnpm run lint
+   pnpm run test
+   pnpm run test:e2e
+   ```
+
+   All must pass before continuing.
 5. **Run Vite preview** to ensure the web app launches (`pnpm run build && pnpm run preview --port 4173`).
-   The agent can check for a **200** response on `http://localhost:4173`.
+   The agent should verify a **200** response at `http://localhost:4173`.
 6. **Produce a single diff** with minimal, focused changes and a Conventional‑style commit.
 
 ---
@@ -174,6 +186,9 @@ pnpm dev
 
 # Run headless component tests with Vitest + jsdom
 pnpm test --watch
+
+# Run Playwright E2E tests
+pnpm run test:e2e
 
 # Analyse TypeScript project graph
 npx tsc --showConfig
