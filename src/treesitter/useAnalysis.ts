@@ -37,7 +37,7 @@ export function useAnalysis() {
       setError(null);
 
       // Show parsing toast
-      addToast(`Parsing... (${files.length} files)`, "info", 0);
+      addToast(`Parsing ${files.length} files`, "info", 3000);
 
       try {
         const worker = new AnalysisWorker();

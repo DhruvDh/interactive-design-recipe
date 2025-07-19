@@ -1,13 +1,15 @@
-import { useState, useEffect } from "react";
+import { radius, gray } from "../../theme";
 import { useAnalysisContext } from "../../contexts/AnalysisContext";
 import { canonical } from "../../utils/paths";
+import clsx from "clsx";
+import { useState, useEffect } from "react";
 
-export interface CodeViewerProps {
-  tabs: string[]; // canonical ids
+interface Props {
+  tabs: string[];
   active: string | null;
   onClose(id: string): void;
   onActivate(id: string): void;
-  onBack(): void; // show recipe card again
+  onBack(): void;
 }
 
 export default function CodeViewer({
@@ -15,134 +17,93 @@ export default function CodeViewer({
   active,
   onClose,
   onActivate,
-  onBack,
-}: CodeViewerProps) {
+}: Props) {
   const { files } = useAnalysisContext();
-  const [fileContents, setFileContents] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-
-  useEffect(() => {
-    const loadFileContents = async () => {
-      for (const tabId of tabs) {
-        if (!fileContents[tabId] && !isLoading[tabId]) {
-          setIsLoading((prev) => ({ ...prev, [tabId]: true }));
-
-          try {
-            // Find the file in the files array using canonical path
-            const fileObj = files.find((f) => canonical(f) === tabId);
-
-            if (fileObj) {
-              const content = await fileObj.text();
-              setFileContents((prev) => ({ ...prev, [tabId]: content }));
-            } else {
-              setFileContents((prev) => ({
-                ...prev,
-                [tabId]: `// File not found: ${tabId}`,
-              }));
-            }
-          } catch (error) {
-            setFileContents((prev) => ({
-              ...prev,
-              [tabId]: `// Error loading file: ${error}`,
-            }));
-          } finally {
-            setIsLoading((prev) => ({ ...prev, [tabId]: false }));
-          }
-        }
-      }
-    };
-
-    loadFileContents();
-  }, [tabs, files, fileContents, isLoading]);
-
-  const handleCloseTab = (tabId: string) => {
-    setFileContents((prev) => {
-      const updated = { ...prev };
-      delete updated[tabId];
-      return updated;
-    });
-    setIsLoading((prev) => {
-      const updated = { ...prev };
-      delete updated[tabId];
-      return updated;
-    });
-    onClose(tabId);
-  };
-
-  const handleCloseLastTab = () => {
-    if (tabs.length === 1) {
-      onBack();
-    }
-  };
-
-  if (tabs.length === 0) {
-    return (
-      <div className="h-full flex items-center justify-center text-neutral-500">
-        <div className="text-center">
-          <p className="text-lg mb-2">No files open</p>
-          <p className="text-sm">
-            Select a file from the project explorer to view its contents
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const fileText = (id: string) =>
+    files.find((f) => canonical(f) === id)?.text() ??
+    Promise.resolve("// file not found");
 
   return (
-    <div className="h-full flex flex-col bg-white rounded-3xl m-0.5 overflow-hidden">
-      {/* Header with back button */}
-      <div className="flex items-center justify-between border-b border-neutral-200 bg-neutral-50 px-4 py-2">
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 text-neutral-600 hover:text-neutral-800 text-sm"
-        >
-          ← Back to Recipe
-        </button>
-      </div>
-
-      {/* Tab bar */}
-      <div className="flex border-b border-neutral-200 bg-neutral-50">
-        {tabs.map((tabId) => (
-          <div
-            key={tabId}
-            className={`flex items-center gap-2 px-4 py-2 border-r border-neutral-200 cursor-pointer transition ${
-              active === tabId
-                ? "bg-white border-b-2 border-b-neutral-500 text-neutral-700"
-                : "hover:bg-neutral-100"
-            }`}
-            onClick={() => onActivate(tabId)}
+    <main
+      className={clsx(
+        "m-0.5 flex flex-col bg-white",
+        radius.outer, // same 24 px
+        "overflow-hidden"
+      )}
+    >
+      {/* --- Tab strip --- */}
+      <div
+        className={clsx(
+          "flex gap-1 px-3 py-2",
+          gray.header,
+          "border-b",
+          gray.stroke
+        )}
+      >
+        {tabs.map((id) => (
+          <button
+            key={id}
+            className={clsx(
+              "flex items-center gap-2 px-3 py-1 text-sm",
+              radius.pill,
+              active === id
+                ? "bg-white shadow"
+                : "bg-brand-200/50 hover:bg-brand-200"
+            )}
+            onClick={() => onActivate(id)}
           >
-            <span className="text-sm">{tabId.split("/").pop()}</span>
-            <button
+            {id.split("/").pop()}
+            <span
               onClick={(e) => {
                 e.stopPropagation();
-                handleCloseTab(tabId);
-                if (tabs.length === 1) {
-                  handleCloseLastTab();
-                }
+                onClose(id);
               }}
-              className="text-neutral-400 hover:text-neutral-600 text-lg leading-none"
-              aria-label={`Close ${tabId.split("/").pop()}`}
+              className={clsx(
+                "w-4 h-4 flex items-center justify-center text-[10px] font-bold",
+                radius.pill,
+                "bg-brand-300 hover:bg-red-500 text-white"
+              )}
             >
               ×
-            </button>
-          </div>
+            </span>
+          </button>
         ))}
       </div>
 
-      {/* File content */}
-      <div className="flex-1 overflow-auto">
-        {active &&
-          (isLoading[active] ? (
-            <div className="h-full flex items-center justify-center text-neutral-500">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <pre className="p-4 text-sm font-mono leading-relaxed text-neutral-800 whitespace-pre-wrap">
-              {fileContents[active] || "Loading..."}
-            </pre>
-          ))}
+      {/* --- Content --- */}
+      <div className="flex-1 overflow-auto bg-brand-50 px-6 py-4 font-mono text-sm">
+        {active ? (
+          <AsyncCode fileId={active} fetchText={fileText} />
+        ) : (
+          <p className="text-brand-500">No file open</p>
+        )}
       </div>
-    </div>
+    </main>
   );
+}
+
+/* async loader component (simple) */
+function AsyncCode({
+  fileId,
+  fetchText,
+}: {
+  fileId: string;
+  fetchText: (id: string) => Promise<string>;
+}) {
+  const [value, setValue] = useState<string>("");
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(null);
+    fetchText(fileId)
+      .then(setValue)
+      .catch(setError)
+      .finally(() => setLoading(false));
+  }, [fileId, fetchText]);
+
+  if (loading) return <p>Loading…</p>;
+  if (error) return <pre>{String(error)}</pre>;
+  return <pre>{value}</pre>;
 }

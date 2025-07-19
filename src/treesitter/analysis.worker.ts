@@ -2,8 +2,8 @@ import { Parser, Language, Query } from "web-tree-sitter";
 import type { ParseRequest, ParseResponse, ErrorResponse } from "./types";
 import { initEmptyAnalysis, normalisers } from "./normalisers";
 
-const CORE = "/tree-sitter.wasm";
-const JAVA = "/tree-sitter-java.wasm";
+const CORE = new URL("/tree-sitter.wasm", import.meta.url).href;
+const JAVA = new URL("/tree-sitter-java.wasm", import.meta.url).href;
 
 // Initialize Tree-sitter parser
 const ready = (async () => {

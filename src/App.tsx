@@ -1,17 +1,23 @@
-import { ProjectGate } from "./components/project/ProjectGate";
-import DRLayout from "./components/layout/DRLayout";
 import { ToastProvider } from "./contexts/ToastContext";
+import DRLayout from "./components/layout/DRLayout";
+import { ProjectGate } from "./components/project/ProjectGate";
 import { ToastContainer } from "./components/ui/ToastContainer";
-import AppRoutes from "./router/AppRoutes";
+import { useAppMachine } from "./state/useAppMachine";
+import { AppActorContext } from "./contexts/AppActorContext";
 
 export default function App() {
+  const machine = useAppMachine(); // {state,send,actor}
+
+  console.log("App component machine:", machine);
+
   return (
     <ToastProvider>
-      <ProjectGate>
-        <DRLayout>       {/* 3-pane shell */}
-          <AppRoutes />  {/* centre routed content */}
-        </DRLayout>
-      </ProjectGate>
+      <AppActorContext.Provider value={machine.actor}>
+        <ProjectGate>
+          {/* still supplies AnalysisContext */}
+          <DRLayout machine={machine} />
+        </ProjectGate>
+      </AppActorContext.Provider>
       <ToastContainer />
     </ToastProvider>
   );

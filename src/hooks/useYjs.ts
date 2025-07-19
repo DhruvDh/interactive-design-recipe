@@ -6,6 +6,10 @@ import { useProject } from "./useProject";
 // Global cache for Y.Doc instances
 const docCache = new Map<string, Y.Doc>();
 
+export function clearDocCache() { 
+  docCache.clear(); 
+}
+
 /**
  * Helper function to ensure .design-recipe directory exists
  */

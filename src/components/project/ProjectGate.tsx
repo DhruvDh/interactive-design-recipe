@@ -1,7 +1,8 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useContext, useEffect } from "react";
 import { AnalysisContext } from "../../contexts/AnalysisContext";
 import { useAnalysis } from "../../treesitter/useAnalysis";
 import { ensureDrFolder } from "../../hooks/useYjs";
+import { AppActorContext } from "../../contexts/AppActorContext";
 import type { AnalysisContextType } from "../../contexts/AnalysisContext";
 
 interface ProjectGateProps {
@@ -22,78 +23,67 @@ export function ProjectGate({ children }: ProjectGateProps) {
     null
   );
   const { analysis, loading, error, refresh, files } = useAnalysis();
+  const actor = useContext(AppActorContext);
+  const state = actor?.getSnapshot();
+  const send = actor?.send;
 
-  // Handle folder selection
-  const handleFolderSelect = useCallback(
-    async (dirHandle: FileSystemDirectoryHandle) => {
-      try {
-        const files: File[] = [];
-
-        // Recursively read files from directory
-        async function readDirectory(
-          handle: FileSystemDirectoryHandle,
-          path = ""
-        ) {
-          for await (const [name, entry] of handle.entries()) {
-            const fullPath = path ? `${path}/${name}` : name;
-
-            if (entry.kind === "file") {
-              const fileHandle = entry as FileSystemFileHandle;
-              const file = await fileHandle.getFile();
-              // Only include Java files for now
-              if (file.name.endsWith(".java")) {
-                // Add webkitRelativePath for compatibility
-                Object.defineProperty(file, "webkitRelativePath", {
-                  value: fullPath,
-                  writable: false,
-                });
-                files.push(file);
-              }
-            } else if (entry.kind === "directory") {
-              await readDirectory(entry as FileSystemDirectoryHandle, fullPath);
-            }
-          }
-        }
-
-        await readDirectory(dirHandle);
-
-        // Create recent entry
-        const recentEntry: RecentEntry = {
-          id: crypto.randomUUID(),
-          name: dirHandle.name,
-          path: dirHandle.name, // For now, use name as path
-          handle: dirHandle,
-          lastAccessed: Date.now(),
-          hasPermission: true,
-        };
-
-        setCurrentProject(recentEntry);
-
-        // Ensure .design-recipe directory exists
+  // Monitor machine state and trigger analysis when needed
+  useEffect(() => {
+    if (state?.matches("analysing") && state.context.files.length > 0 && send) {
+      const triggerAnalysis = async () => {
         try {
-          await ensureDrFolder(dirHandle);
+          // Ensure .design-recipe directory exists if we have a directory handle
+          if (state.context.dir) {
+            try {
+              await ensureDrFolder(state.context.dir);
+            } catch (err) {
+              console.error("Failed to create .design-recipe directory:", err);
+            }
+
+            // Create recent entry
+            const recentEntry: RecentEntry = {
+              id: crypto.randomUUID(),
+              name: state.context.dir.name,
+              path: state.context.dir.name,
+              handle: state.context.dir,
+              lastAccessed: Date.now(),
+              hasPermission: true,
+            };
+            setCurrentProject(recentEntry);
+          }
+
+          // Start analysis
+          await refresh(state.context.files);
+
+          // When analysis is complete, notify the machine
+          if (analysis) {
+            send({ type: "PARSE_OK", analysis });
+          }
         } catch (err) {
-          console.error("Failed to create .design-recipe directory:", err);
+          console.error("Analysis failed:", err);
+          send({ type: "PARSE_FAIL", message: String(err) });
         }
+      };
 
-        // Start analysis
-        await refresh(files);
-      } catch (err) {
-        console.error("Failed to process folder:", err);
-      }
-    },
-    [refresh]
-  );
+      triggerAnalysis();
+    }
+  }, [state, refresh, analysis, send]);
 
-  // If no project is selected, still provide context to children
-  // The routing will handle showing the appropriate page
+  // Legacy handle folder select for compatibility
+  const handleFolderSelect = useCallback(async () => {
+    // This is now handled by the machine, but kept for compatibility
+    console.log(
+      "handleFolderSelect called - this should be handled by the machine now"
+    );
+  }, []);
+
   const contextValue: AnalysisContextType = {
     analysis,
     loading,
     error,
     refresh,
     currentProject,
-    files,
+    files: state?.context.files.length > 0 ? state.context.files : files,
     handleFolderSelect,
   };
 

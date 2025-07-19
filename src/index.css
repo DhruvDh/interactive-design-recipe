@@ -4,7 +4,23 @@
 /* 2 – Tailwind layers */
 @import "tailwindcss";
 
-/* 3 – Global defaults */
+/* 3 – Design tokens and configuration */
+@theme {
+  --radius-lg2: 18px;
+  --radius-3xl: 24px;
+  --color-brand-50: #f6f7f9;
+  --color-brand-100: #eceef2;
+  --color-brand-200: #d2d6df;
+  --color-brand-300: #b7bdcc;
+  --color-brand-400: #9ca4b9;
+  --color-brand-500: #7f8aa2;
+  --color-brand-600: #636f87;
+  --color-brand-700: #4b566b;
+  --color-brand-800: #333d4f;
+  --color-brand-900: #1b2433;
+}
+
+/* 4 – Global defaults */
 @layer base {
   :root {
     --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
