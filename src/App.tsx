@@ -8,7 +8,6 @@ import { AppActorContext } from "./contexts/AppActorContext";
 export default function App() {
   const machine = useAppMachine(); // {state,send,actor}
 
-  console.log("App component machine:", machine);
 
   return (
     <ToastProvider>

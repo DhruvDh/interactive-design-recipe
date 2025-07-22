@@ -9,10 +9,6 @@ import { clearDocCache } from "../hooks/useYjs";
 export function useAppMachine() {
   const [state, send, actor] = useMachine(appMachine);
   
-  // Debug logging
-  console.log("useAppMachine state:", state);
-  console.log("useAppMachine send:", send);
-  console.log("useAppMachine actor:", actor);
 
   // Clear cache when resetting
   const originalSend = send;

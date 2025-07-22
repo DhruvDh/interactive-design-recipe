@@ -3,6 +3,7 @@ import ChatSidebar from "./ChatSidebar";
 import CodeViewer from "../viewer/CodeViewer";
 import { Card } from "../ui/Card";
 import AppRoutes from "../../router/AppRoutes";
+import { useRouteSync } from "../../hooks/useRouteSync";
 
 interface Props {
   machine: ReturnType<typeof import("../../state/useAppMachine").useAppMachine>;
@@ -11,14 +12,8 @@ interface Props {
 export default function DRLayout({ machine }: Props) {
   const { state, send } = machine;
 
-  // Debug logging
-  console.log("DRLayout received machine:", machine);
-  console.log("DRLayout state:", state);
+  useRouteSync(state, send);
 
-  // Add safety check
-  if (!state) {
-    return <div>Loading machine state...</div>;
-  }
 
   const openTabs = state.context.openTabs;
   const activeTab = openTabs[openTabs.length - 1] ?? null;
@@ -33,12 +28,18 @@ export default function DRLayout({ machine }: Props) {
     backToRecipe: () => send({ type: "CLOSE_ALL" }),
   };
 
+  const timelineDisabled =
+    !state.matches("ready") &&
+    !state.matches("viewingCode") &&
+    !state.matches("finalising");
+
   return (
     <div className="min-h-screen grid grid-cols-[18rem_1fr_22rem] font-sans">
       {/* ---------- LEFT ------------- */}
-      {(state.matches("ready") ||
-        state.matches("viewingCode") ||
-        state.matches("finalising")) && <NavSidebar onOpenFile={ui.openFile} />}
+      <NavSidebar
+        onOpenFile={ui.openFile}
+        timelineDisabled={timelineDisabled}
+      />
 
       {/* ---------- CENTRE ----------- */}
       {state.matches("idle") && (
@@ -77,9 +78,7 @@ export default function DRLayout({ machine }: Props) {
       )}
 
       {/* ---------- RIGHT ------------ */}
-      {(state.matches("ready") ||
-        state.matches("viewingCode") ||
-        state.matches("finalising")) && <ChatSidebar />}
+      <ChatSidebar />
     </div>
   );
 }

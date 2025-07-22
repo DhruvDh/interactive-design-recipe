@@ -72,9 +72,6 @@ export function ProjectGate({ children }: ProjectGateProps) {
   // Legacy handle folder select for compatibility
   const handleFolderSelect = useCallback(async () => {
     // This is now handled by the machine, but kept for compatibility
-    console.log(
-      "handleFolderSelect called - this should be handled by the machine now"
-    );
   }, []);
 
   const contextValue: AnalysisContextType = {
