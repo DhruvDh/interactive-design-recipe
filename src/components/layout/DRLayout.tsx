@@ -3,6 +3,7 @@ import ChatSidebar from "./ChatSidebar";
 import CodeViewer from "../viewer/CodeViewer";
 import { Card } from "../ui/Card";
 import AppRoutes from "../../router/AppRoutes";
+import { useRouteSync } from "../../hooks/useRouteSync";
 
 interface Props {
   machine: ReturnType<typeof import("../../state/useAppMachine").useAppMachine>;
@@ -11,6 +12,7 @@ interface Props {
 export default function DRLayout({ machine }: Props) {
   const { state, send } = machine;
 
+  useRouteSync(state, send);
   // Debug logging
   console.log("DRLayout received machine:", machine);
   console.log("DRLayout state:", state);

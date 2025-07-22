@@ -11,7 +11,8 @@ export type AppEvent =
   | { type: "OPEN_FILE"; id: string }
   | { type: "CLOSE_ALL" }
   | { type: "FINALISE" }
-  | { type: "RESET" };
+  | { type: "RESET" }
+  | { type: "BACK_TO_RECIPE" };
 
 export interface AppContext {
   dir?: FileSystemDirectoryHandle;
@@ -90,7 +91,11 @@ export const appMachine = createMachine({
     },
 
     finalising: {
-      on: { RESET: "idle", OPEN_FILE: "viewingCode" },
+      on: {
+        RESET: "idle",
+        OPEN_FILE: "viewingCode",
+        BACK_TO_RECIPE: "ready",
+      },
     },
   },
 });
