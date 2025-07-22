@@ -4,13 +4,17 @@ test.describe("Design Recipe Assistant - Smoke Tests", () => {
   test("should load the application", async ({ page }) => {
     await page.goto("/");
 
-    await expect(page.locator('[data-testid="timeline-nav"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('[data-testid="file-tree"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="nav-sidebar"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('[data-testid="chat-sidebar"]')).toBeVisible();
+    await expect(page.locator('[data-testid="timeline-nav"]')).toBeVisible();
+    await expect(page.locator('[data-testid="file-tree"]')).toBeVisible();
   });
 
-  test("should navigate between timeline items", async ({ page }) => {
+  test("timeline items disabled until project is loaded", async ({ page }) => {
     await page.goto("/overview");
 
+    const stepLink = page.getByRole("link", { name: "Step 0 — Restate" });
+    await expect(stepLink).toHaveAttribute("aria-disabled", "true");
     // Click on Step 0
     await page.getByRole("link", { name: "Step 0 — Restate" }).click({ timeout: 10000 });
     await expect(page).toHaveURL("/step/0");
@@ -27,12 +31,9 @@ test.describe("Design Recipe Assistant - Smoke Tests", () => {
     await expect(page.getByRole("heading", { name: /Project Overview/i })).toBeVisible();
   });
 
-  test("should show step 0 after navigation", async ({ page }) => {
-    await page.goto("/overview");
-
-    await page.getByRole("link", { name: "Step 0 — Restate" }).click({ timeout: 10000 });
-    await expect(page).toHaveURL("/step/0");
-    await expect(page.getByRole("heading", { name: /Step 0/i })).toBeVisible();
+  test("finalise route shows idle screen without project", async ({ page }) => {
+    await page.goto("/finalise");
+    await expect(page.locator('text=Design‑Recipe Workbench')).toBeVisible();
   });
 
   // TODO: Add tests for file handling when we have mock project data

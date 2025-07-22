@@ -6,13 +6,17 @@ import { radius } from "../../theme";
 
 type Status = "todo" | "done";
 
-export function TimelineNav() {
+export interface TimelineNavProps {
+  disabled?: boolean;
+}
+export function TimelineNav({ disabled = false }: TimelineNavProps) {
   const statusDoc = useStatusDoc();
   const [statusMap, toggle] = useYMap<Status>(statusDoc, "status");
 
   /** Renders a single step */
   const Step = ({ id, name, route }: (typeof navItems)[number]) => {
     const status: Status = statusMap.get(id) ?? "todo";
+    const isDisabled = disabled && id !== "select";
 
     return (
       <li className="relative pl-6">
@@ -38,10 +42,17 @@ export function TimelineNav() {
         <NavLink
           to={route}
           end
+          aria-disabled={isDisabled || undefined}
+          tabIndex={isDisabled ? -1 : undefined}
+          onClick={isDisabled ? (e) => e.preventDefault() : undefined}
           className={({ isActive }) =>
             clsx(
               "block rounded-md px-3 py-2 text-sm transition",
-              isActive ? "bg-brand-700 text-white" : "hover:bg-brand-100"
+              isDisabled
+                ? "text-neutral-400 cursor-not-allowed"
+                : isActive
+                ? "bg-brand-700 text-white"
+                : "hover:bg-brand-100"
             )
           }
         >
