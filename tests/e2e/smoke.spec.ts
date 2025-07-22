@@ -15,6 +15,20 @@ test.describe("Design Recipe Assistant - Smoke Tests", () => {
 
     const stepLink = page.getByRole("link", { name: "Step 0 — Restate" });
     await expect(stepLink).toHaveAttribute("aria-disabled", "true");
+    // Click on Step 0
+    await page.getByRole("link", { name: "Step 0 — Restate" }).click({ timeout: 10000 });
+    await expect(page).toHaveURL("/step/0");
+    await expect(page.getByRole("heading", { name: /Step 0/i })).toBeVisible();
+
+    // Click on Step 1
+    await page.getByRole("link", { name: "Step 1 — Data Definitions" }).click();
+    await expect(page).toHaveURL("/step/1");
+    await expect(page.getByRole("heading", { name: /Step 1/i })).toBeVisible();
+
+    // Click on Overview
+    await page.getByRole("link", { name: "Project Overview" }).click();
+    await expect(page).toHaveURL("/overview");
+    await expect(page.getByRole("heading", { name: /Project Overview/i })).toBeVisible();
   });
 
   test("finalise route shows idle screen without project", async ({ page }) => {
