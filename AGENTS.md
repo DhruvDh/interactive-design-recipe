@@ -1,12 +1,4 @@
 # AGENTS.md
-# Design‑Recipe Workbench – Contributor & Agent Guide
-#
-# This file gives OpenAI Codex (cloud agent) – and any human contributor –
-# the exact context, rules and commands needed to work productively in
-# this repository.  **Nothing here is optional.**  Changes that violate
-# these rules should be rejected or revised.
-
----
 
 ## 1 Repository at a glance
 
@@ -35,6 +27,7 @@
 
 > **Agent note** – treat everything under `src/` as TypeScript (strict mode).  
 > Do not introduce JavaScript files unless absolutely necessary.
+> There is an `notes/design-recipe.md` markdown file that explains the design recipe this app is an interactive LLM-assisted GUI for. Please ALWAYS refer to it before changing or trying to understand any of the Design Recipe Step components.
 
 ---
 
@@ -101,6 +94,7 @@ The agent **MUST** follow *exactly* this sequence for any **Code‑mode** task:
    ```bash
    pnpm install
    ```
+
 2. **Quick sanity**
 
    ```bash
@@ -196,16 +190,3 @@ npx tsc --showConfig
 # Reset Yjs doc cache (important for test isolation)
 pnpm ts-node -e "import {clearDocCache} from './src/hooks/useYjs'; clearDocCache();"
 ```
-
----
-
-## 10 Contact & escalation
-
-* **Maintainer**: @designrecipe‑core<br>
-  For architectural questions or large refactors, open a GitHub Discussion first.
-* **CI**: GitHub Actions → `.github/workflows` must stay green.
-* **Production**: Deploys are automated from `main` via Netlify; PRs must include a deploy preview URL.
-
----
-
-Happy shipping! 🥳
