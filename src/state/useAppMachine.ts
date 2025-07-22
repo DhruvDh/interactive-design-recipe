@@ -1,6 +1,8 @@
 import { useMachine } from "@xstate/react";
 import { appMachine } from "./appMachine";
 import { clearDocCache } from "../hooks/useYjs";
+import { ensureDrKey } from "../hooks/useDrKey";
+import { saveLastProjectHandle } from "../utils/lastProject";
 
 /**
  * Adapter that provides the state machine with helper functions
@@ -51,7 +53,12 @@ export function useAppMachine() {
         }
       }
       await walk(dir);
-      wrappedSend({ type: "SELECTED", dir, files });
+
+      /* NEW – create or load dr-key */
+      const dirKey = await ensureDrKey(dir);
+
+      wrappedSend({ type: "SELECTED", dir, files, dirKey });
+      await saveLastProjectHandle(dir);
     } catch {
       wrappedSend({ type: "CANCEL" });
     }

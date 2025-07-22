@@ -5,6 +5,6 @@ export function useProject() {
 
   return {
     dirHandle: currentProject?.handle || null,
-    dirKey: currentProject?.id || null, // Will be updated to use .dr-key file
+    dirKey: currentProject?.id || null,
   };
 }

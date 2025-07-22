@@ -3,10 +3,12 @@ import DRLayout from "./components/layout/DRLayout";
 import { ProjectGate } from "./components/project/ProjectGate";
 import { ToastContainer } from "./components/ui/ToastContainer";
 import { useAppMachine } from "./state/useAppMachine";
+import { useAutoReconnectProject } from "./hooks/useAutoReconnectProject";
 import { AppActorContext } from "./contexts/AppActorContext";
 
 export default function App() {
   const machine = useAppMachine(); // {state,send,actor}
+  useAutoReconnectProject();
 
 
   return (

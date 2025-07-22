@@ -4,7 +4,12 @@ import type { DRAnalysis } from "../treesitter/types";
 /** Public events */
 export type AppEvent =
   | { type: "PICK" }
-  | { type: "SELECTED"; dir: FileSystemDirectoryHandle; files: File[] }
+  | {
+      type: "SELECTED";
+      dir: FileSystemDirectoryHandle;
+      files: File[];
+      dirKey: string;
+    }
   | { type: "CANCEL" }
   | { type: "PARSE_OK"; analysis: DRAnalysis }
   | { type: "PARSE_FAIL"; message: string }
@@ -16,6 +21,7 @@ export type AppEvent =
 
 export interface AppContext {
   dir?: FileSystemDirectoryHandle;
+  dirKey?: string;
   files: File[];
   analysis?: DRAnalysis;
   openTabs: string[];
@@ -43,6 +49,7 @@ export const appMachine = createMachine({
           actions: assign({
             dir: ({ event }) => event.dir,
             files: ({ event }) => event.files,
+            dirKey: ({ event }) => event.dirKey,
           }),
         },
         CANCEL: "idle",

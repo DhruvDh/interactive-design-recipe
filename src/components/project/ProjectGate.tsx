@@ -42,7 +42,7 @@ export function ProjectGate({ children }: ProjectGateProps) {
 
             // Create recent entry
             const recentEntry: RecentEntry = {
-              id: crypto.randomUUID(),
+              id: state.context.dirKey!,
               name: state.context.dir.name,
               path: state.context.dir.name,
               handle: state.context.dir,
