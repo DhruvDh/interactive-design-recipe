@@ -109,11 +109,14 @@ export function useDoc(stepId: string): Y.Doc | null {
   const updateHandlerRef = useRef<((update: Uint8Array) => void) | null>(null);
 
   useEffect(() => {
-    if (!dirHandle || !dirKey) {
+    if (!dirHandle) {
       setDoc(null);
       return;
     }
-
+    if (!dirKey) {
+      setDoc(null);
+      return;
+    }
     const key = `${dirKey}:${stepId}`;
 
     // Get or create doc from cache
