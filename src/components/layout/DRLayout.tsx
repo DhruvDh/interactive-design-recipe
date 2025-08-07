@@ -4,6 +4,7 @@ import CodeViewer from "../viewer/CodeViewer";
 import { Card } from "../ui/Card";
 import AppRoutes from "../../router/AppRoutes";
 import { useRouteSync } from "../../hooks/useRouteSync";
+import { useLocation } from "react-router-dom";
 
 interface Props {
   machine: ReturnType<typeof import("../../state/useAppMachine").useAppMachine>;
@@ -11,6 +12,7 @@ interface Props {
 
 export default function DRLayout({ machine }: Props) {
   const { state, send } = machine;
+  const location = useLocation();
 
   useRouteSync(state, send);
   // Debug logging
@@ -60,8 +62,8 @@ export default function DRLayout({ machine }: Props) {
         </Card>
       )}
       {state.matches("ready") && (
-        <Card>
-          <AppRoutes />
+        <Card key={location.pathname}>
+          <AppRoutes key={location.pathname} />
         </Card>
       )}
       {state.matches("viewingCode") && (
@@ -74,8 +76,8 @@ export default function DRLayout({ machine }: Props) {
         />
       )}
       {state.matches("finalising") && (
-        <Card>
-          <AppRoutes />
+        <Card key={location.pathname}>
+          <AppRoutes key={location.pathname} />
         </Card>
       )}
 

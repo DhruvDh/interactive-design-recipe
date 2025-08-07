@@ -65,7 +65,9 @@ export function TimelineNav({ disabled = false }: TimelineNavProps) {
   return (
     <nav data-testid="timeline-nav" className="select-none">
       <ul role="list" className="space-y-1">
-        {navItems.map(Step)}
+        {navItems.map((item) => (
+          <Step key={item.id} {...item} />
+        ))}
       </ul>
     </nav>
   );

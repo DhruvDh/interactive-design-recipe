@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import type { ActorRefFrom } from "xstate";
-import { loadLastProjectHandle } from "../utils/lastProject";
+import {
+  loadLastProjectHandle,
+  clearLastProjectHandle,
+} from "../utils/lastProject";
 import { appMachine } from "../state/appMachine";
 import { ensureDrKey } from "./useDrKey";
 
@@ -9,11 +12,21 @@ export function useAutoReconnectProject(
 ) {
   useEffect(() => {
     (async () => {
-      const handle = await loadLastProjectHandle();
+      let handle: FileSystemDirectoryHandle | undefined;
+      try {
+        handle = await loadLastProjectHandle();
+      } catch (error) {
+        console.warn("Failed to load last project handle:", error);
+        await clearLastProjectHandle();
+        return;
+      }
       if (!handle) return;
 
-      const perm = await handle.queryPermission();
-      if (perm !== "granted") return;
+      let perm = await handle.queryPermission();
+      if (perm !== "granted") {
+        perm = await handle.requestPermission();
+        if (perm !== "granted") return; // user denied → abort
+      }
 
       const dirKey = await ensureDrKey(handle);
 
