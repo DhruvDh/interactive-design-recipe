@@ -60,7 +60,9 @@ function extractModifiers(captures: QueryMatch["captures"]): string[] {
 /**
  * Extract Javadoc comment from a node by looking for preceding block comments
  */
-function extractJavadoc(node: QueryMatch["captures"][0]["node"]): string | undefined {
+function extractJavadoc(
+  node: QueryMatch["captures"][0]["node"]
+): string | undefined {
   let current = node.previousSibling;
   while (current && current.type.match(/^(line_comment|block_comment)$/)) {
     if (current.type === "block_comment" && current.text.startsWith("/**")) {
@@ -364,6 +366,12 @@ export function normaliseInterfaceConstants(
   });
 }
 
+// Type guard for nodes with prevSibling
+interface TSNodeWithPrev {
+  text: string;
+  prevSibling?: TSNodeWithPrev;
+}
+
 export function normaliseImports(
   matches: QueryMatch[],
   _filePath: string,
@@ -374,12 +382,13 @@ export function normaliseImports(
       (c) => c.name === "import_path"
     );
     const asteriskCapture = match.captures.find((c) => c.name === "asterisk");
-    const modifiersCapture = match.captures.find((c) => c.name === "modifiers");
 
     if (importPathCapture) {
       const importPath = importPathCapture.node.text;
       const isWildcard = !!asteriskCapture;
-      const isStatic = modifiersCapture?.node.text.includes("static") || false;
+      // Check if 'static' literal appears before the import_path
+      const nodeWithPrev = importPathCapture.node as TSNodeWithPrev;
+      const isStatic = nodeWithPrev.prevSibling?.text === "static";
 
       // Extract package and class name
       const parts = importPath.split(".");

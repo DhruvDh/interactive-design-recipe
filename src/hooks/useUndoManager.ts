@@ -1,43 +1,28 @@
-import { useState, useEffect, useRef } from "react";
+import { useRef, useEffect, useMemo } from "react";
 import * as Y from "yjs";
 
 /**
- * Updated useUndo hook with new signature as specified in the guide
- * Each Step passes only the Y object(s) it mutates.
+ * Stable useUndo hook that prevents recreation loops
+ * Uses GUID-based signature to detect actual changes in tracked objects
  */
-export function useUndo(
-  tracked:
-    | (Y.AbstractType<unknown> | Y.Array<unknown> | Y.Text | Y.Map<unknown>)[]
-    | null
+export function useUndo<T extends Y.AbstractType<unknown>>(
+  tracked: readonly T[] | null
 ): Y.UndoManager | null {
-  const [um, setUM] = useState<Y.UndoManager | null>(null);
-  const prevRef = useRef<typeof tracked>(null);
+  const mgrRef = useRef<Y.UndoManager>();
+
+  // Create stable signature based on GUIDs
+  const signature = useMemo(() => {
+    return (
+      tracked?.map((t) => (t as unknown as { guid: string }).guid).join("|") ??
+      ""
+    );
+  }, [tracked]);
 
   useEffect(() => {
-    // Check if the tracked array has actually changed by comparing elements
-    const same =
-      prevRef.current &&
-      tracked &&
-      prevRef.current.length === tracked.length &&
-      prevRef.current.every((v, i) => v === tracked[i]);
+    mgrRef.current?.destroy();
+    mgrRef.current = tracked?.length ? new Y.UndoManager(tracked) : undefined;
+    return () => mgrRef.current?.destroy();
+  }, [signature, tracked]);
 
-    if (same) return;
-
-    // Clean up previous manager
-    if (um) um.destroy();
-    prevRef.current = tracked;
-
-    if (tracked && tracked.length > 0) {
-      const manager = new Y.UndoManager(tracked);
-      setUM(manager);
-
-      return () => {
-        manager.destroy();
-      };
-    } else {
-      setUM(null);
-    }
-  }, [tracked, um]); // Include um in dependencies
-
-  return um;
+  return mgrRef.current ?? null;
 }

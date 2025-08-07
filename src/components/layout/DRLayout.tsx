@@ -15,12 +15,13 @@ export default function DRLayout({ machine }: Props) {
   const location = useLocation();
 
   useRouteSync(state, send);
-  // Debug logging
-  console.log("DRLayout received machine:", machine);
-  console.log("DRLayout state:", state);
 
   const openTabs = state.context.openTabs;
   const activeTab = openTabs[openTabs.length - 1] ?? null;
+
+  // Debug logging
+  console.log("DRLayout openTabs:", openTabs);
+  console.log("DRLayout activeTab:", activeTab);
 
   /* -------- helper events -------- */
   const ui = {

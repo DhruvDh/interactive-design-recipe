@@ -39,10 +39,16 @@ function FileNodeItem({
   }, [isFocused]);
 
   const handleClick = () => {
+    console.log("FileTree handleClick:", {
+      nodeId: node.id,
+      nodeType: node.type,
+      nodeName: node.name,
+    });
     setFocusedNodeId(node.id);
     if (node.type === "dir") {
       toggleExpanded(node.id);
     } else {
+      console.log("FileTree calling onOpenFile with id:", node.id);
       onOpenFile(node.id);
     }
   };

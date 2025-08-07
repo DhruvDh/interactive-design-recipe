@@ -1,12 +1,14 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { ToastContext } from "./ToastContextDefinition";
 import type { Toast } from "./ToastContextDefinition";
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const displayedToasts = useRef<Set<string>>(new Set());
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    displayedToasts.current.delete(id);
   }, []);
 
   const addToast = useCallback(
@@ -15,18 +17,41 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       const toast: Toast = { id, message, type, duration };
 
       setToasts((prev) => [...prev, toast]);
-
-      if (duration > 0) {
-        setTimeout(() => {
-          removeToast(id);
-        }, duration);
-      }
     },
-    [removeToast]
+    []
+  );
+
+  // Idempotent effect to handle toast timeouts
+  useEffect(() => {
+    toasts.forEach((toast) => {
+      if (displayedToasts.current.has(toast.id)) return; // Already processed
+
+      displayedToasts.current.add(toast.id);
+
+      if (toast.duration && toast.duration > 0) {
+        setTimeout(() => {
+          removeToast(toast.id);
+        }, toast.duration);
+      }
+    });
+  }, [toasts, removeToast]);
+
+  // Clean up displayed set on unmount
+  useEffect(() => {
+    const displayed = displayedToasts.current;
+    return () => {
+      displayed.clear();
+    };
+  }, []);
+
+  // Memoize context value to prevent unnecessary rerenders
+  const contextValue = useMemo(
+    () => ({ toasts, addToast, removeToast }),
+    [toasts, addToast, removeToast]
   );
 
   return (
-    <ToastContext.Provider value={{ toasts, addToast, removeToast }}>
+    <ToastContext.Provider value={contextValue}>
       {children}
     </ToastContext.Provider>
   );

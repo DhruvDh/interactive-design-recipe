@@ -20,6 +20,7 @@ interface MockNode {
   childForFieldName?: (field: string) => MockNode | null;
   childCount?: number;
   child?: (index: number) => MockNode | null;
+  prevSibling?: MockNode;
 }
 
 interface MockCapture {
@@ -995,12 +996,9 @@ describe("normalisers", () => {
             name: "import_path",
             node: {
               text: "java.util.Collections",
-            },
-          },
-          {
-            name: "modifiers",
-            node: {
-              text: "static",
+              prevSibling: {
+                text: "static",
+              },
             },
           },
         ],
@@ -1034,6 +1032,39 @@ describe("normalisers", () => {
       normaliseImports([mockMatch as QueryMatch], "TestFile.java", analysis);
 
       expect(analysis.imports).toHaveLength(1);
+    });
+
+    it("should parse static wildcard imports", () => {
+      const analysis = initEmptyAnalysis();
+      const mockMatch: MockMatch = {
+        captures: [
+          {
+            name: "import_path",
+            node: {
+              text: "java.util",
+              prevSibling: {
+                text: "static",
+              },
+            },
+          },
+          {
+            name: "asterisk",
+            node: {
+              text: "*",
+            },
+          },
+        ],
+      };
+
+      normaliseImports([mockMatch as QueryMatch], "TestFile.java", analysis);
+
+      expect(analysis.imports).toHaveLength(1);
+      expect(analysis.imports[0]).toEqual({
+        packageName: "java.util",
+        className: undefined,
+        isStatic: true,
+        isWildcard: true,
+      });
     });
   });
 });
