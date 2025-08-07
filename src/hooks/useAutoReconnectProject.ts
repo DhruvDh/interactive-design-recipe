@@ -1,14 +1,12 @@
 import { useEffect } from "react";
-import { ActorRefFrom } from "xstate";
+import type { ActorRefFrom } from "xstate";
 import { loadLastProjectHandle } from "../utils/lastProject";
 import { appMachine } from "../state/appMachine";
 import { ensureDrKey } from "./useDrKey";
 
 export function useAutoReconnectProject(
-  actor: ActorRefFrom<typeof appMachine>,
+  actor: ActorRefFrom<typeof appMachine>
 ) {
-  const { send } = actor;
-
   useEffect(() => {
     (async () => {
       const handle = await loadLastProjectHandle();
@@ -34,7 +32,7 @@ export function useAutoReconnectProject(
       }
       await walk(handle);
 
-      send({ type: "SELECTED", dir: handle, files, dirKey });
+      actor.send({ type: "SELECTED", dir: handle, files, dirKey });
     })();
-  }, [send]);
+  }, [actor]);
 }
