@@ -11,20 +11,16 @@ export function useRouteSync(
 
   useEffect(() => {
     const { pathname } = location;
-    const inRecipe =
-      pathname === "/overview" || matchPath("/step/:id", pathname) !== null;
 
     if (pathname === "/finalise") {
       if (!state.matches("finalising")) {
         send({ type: "FINALISE" });
       }
-    } else if (inRecipe) {
-      if (state.matches("finalising")) {
-        send({ type: "BACK_TO_RECIPE" });
-      }
-      if (state.matches("viewingCode")) {
-        send({ type: "CLOSE_ALL" });
-      }
+    } else if (state.matches("finalising") && pathname !== "/finalise") {
+      // If we're in finalising state but not on finalise route, go back to ready
+      send({ type: "BACK_TO_RECIPE" });
     }
+    // Removed the logic that automatically closes files when on recipe routes
+    // This allows users to view code files while working on recipe steps
   }, [location, location.pathname, state, send]);
 }
