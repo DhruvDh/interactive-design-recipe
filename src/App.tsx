@@ -8,7 +8,7 @@ import { AppActorContext } from "./contexts/AppActorContext";
 
 export default function App() {
   const machine = useAppMachine(); // {state,send,actor}
-  useAutoReconnectProject();
+  useAutoReconnectProject(machine.actor);
 
 
   return (

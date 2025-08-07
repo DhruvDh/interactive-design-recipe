@@ -1,10 +1,13 @@
 import { useEffect } from "react";
+import { ActorRefFrom } from "xstate";
 import { loadLastProjectHandle } from "../utils/lastProject";
-import { useAppMachine } from "../state/useAppMachine";
+import { appMachine } from "../state/appMachine";
 import { ensureDrKey } from "./useDrKey";
 
-export function useAutoReconnectProject() {
-  const { send } = useAppMachine();
+export function useAutoReconnectProject(
+  actor: ActorRefFrom<typeof appMachine>,
+) {
+  const { send } = actor;
 
   useEffect(() => {
     (async () => {
