@@ -5,10 +5,10 @@ import * as Y from "yjs";
  * Stable useUndo hook that prevents recreation loops
  * Uses GUID-based signature to detect actual changes in tracked objects
  */
-export function useUndo<T extends Y.AbstractType<unknown>>(
-  tracked: readonly T[] | null
+export function useUndo(
+  tracked: readonly Y.AbstractType<unknown>[] | null
 ): Y.UndoManager | null {
-  const mgrRef = useRef<Y.UndoManager>();
+  const mgrRef = useRef<Y.UndoManager | undefined>(undefined);
 
   // Create stable signature based on GUIDs
   const signature = useMemo(() => {
@@ -20,7 +20,9 @@ export function useUndo<T extends Y.AbstractType<unknown>>(
 
   useEffect(() => {
     mgrRef.current?.destroy();
-    mgrRef.current = tracked?.length ? new Y.UndoManager(tracked) : undefined;
+    mgrRef.current = tracked?.length
+      ? new Y.UndoManager([...tracked])
+      : undefined;
     return () => mgrRef.current?.destroy();
   }, [signature, tracked]);
 

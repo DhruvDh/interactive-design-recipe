@@ -7,7 +7,9 @@ import { useRouteSync } from "../../hooks/useRouteSync";
 import { useLocation } from "react-router-dom";
 
 interface Props {
-  machine: ReturnType<typeof import("../../state/useAppMachine").useAppMachine>;
+  readonly machine: ReturnType<
+    typeof import("../../state/useAppMachine").useAppMachine
+  >;
 }
 
 export default function DRLayout({ machine }: Props) {
@@ -90,8 +92,8 @@ export default function DRLayout({ machine }: Props) {
 
 /* -------------------------------------- helpers */
 interface IdleScreenProps {
-  send: (event: { type: "PICK" }) => void;
-  handleFolderPick: () => Promise<void>;
+  readonly send: (event: { type: "PICK" }) => void;
+  readonly handleFolderPick: () => Promise<void>;
 }
 
 function IdleScreen({ send, handleFolderPick }: IdleScreenProps) {

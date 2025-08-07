@@ -2,7 +2,11 @@ import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { ToastContext } from "./ToastContextDefinition";
 import type { Toast } from "./ToastContextDefinition";
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+export function ToastProvider({
+  children,
+}: {
+  readonly children: React.ReactNode;
+}) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const displayedToasts = useRef<Set<string>>(new Set());
 

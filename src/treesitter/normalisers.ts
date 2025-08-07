@@ -64,8 +64,8 @@ function extractJavadoc(
   node: QueryMatch["captures"][0]["node"]
 ): string | undefined {
   let current = node.previousSibling;
-  while (current && current.type.match(/^(line_comment|block_comment)$/)) {
-    if (current.type === "block_comment" && current.text.startsWith("/**")) {
+  while (current?.type.match(/^(line_comment|block_comment)$/)) {
+    if (current.type === "block_comment" && /^\/\*\*/.exec(current.text)) {
       return current.text;
     }
     current = current.previousSibling;

@@ -1,4 +1,4 @@
-import { useState, useCallback, useContext, useEffect } from "react";
+import { useState, useCallback, useContext, useEffect, useMemo } from "react";
 import { AnalysisContext } from "../../contexts/AnalysisContext";
 import { useAnalysis } from "../../treesitter/useAnalysis";
 import { ensureDrFolder } from "../../hooks/useYjs";
@@ -6,7 +6,7 @@ import { AppActorContext } from "../../contexts/AppActorContext";
 import type { AnalysisContextType } from "../../contexts/AnalysisContext";
 
 interface ProjectGateProps {
-  children: React.ReactNode;
+  readonly children: React.ReactNode;
 }
 
 interface RecentEntry {
@@ -74,15 +74,27 @@ export function ProjectGate({ children }: ProjectGateProps) {
     // This is now handled by the machine, but kept for compatibility
   }, []);
 
-  const contextValue: AnalysisContextType = {
-    analysis,
-    loading,
-    error,
-    refresh,
-    currentProject,
-    files: state?.context.files.length > 0 ? state.context.files : files,
-    handleFolderSelect,
-  };
+  const contextValue: AnalysisContextType = useMemo(
+    () => ({
+      analysis,
+      loading,
+      error,
+      refresh,
+      currentProject,
+      files: state?.context.files.length > 0 ? state.context.files : files,
+      handleFolderSelect,
+    }),
+    [
+      analysis,
+      loading,
+      error,
+      refresh,
+      currentProject,
+      state?.context.files,
+      files,
+      handleFolderSelect,
+    ]
+  );
 
   return (
     <AnalysisContext.Provider value={contextValue}>

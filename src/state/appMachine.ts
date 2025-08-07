@@ -39,7 +39,18 @@ export const appMachine = createMachine({
 
   states: {
     idle: {
-      on: { PICK: "selecting" },
+      on: {
+        PICK: "selecting",
+        // Auto-reconnect path
+        SELECTED: {
+          target: "analysing",
+          actions: assign({
+            dir: ({ event }) => event.dir,
+            files: ({ event }) => event.files,
+            dirKey: ({ event }) => event.dirKey,
+          }),
+        },
+      },
     },
 
     selecting: {

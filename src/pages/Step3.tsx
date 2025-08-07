@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { useDoc, useYArray } from "../hooks/useYjs";
+import { useDoc, useYArray, writeText } from "../hooks/useYjs";
 import { useUndo } from "../hooks/useUndoManager";
 import { useAnalysisContext } from "../contexts/AnalysisContext";
-import { writeText } from "../hooks/useYjs";
 import { useToast } from "../hooks/useToast";
 import type { MethodInfo, ClassInfo } from "../treesitter/types";
 

@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useLocation, matchPath } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import type { StateFrom } from "xstate";
 import { appMachine, type AppEvent } from "../state/appMachine";
 

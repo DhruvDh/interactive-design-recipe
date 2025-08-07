@@ -2,19 +2,19 @@ import { useState, useRef, useEffect } from "react";
 import type { FileNode } from "../../constants/navigation";
 
 export interface FileTreeProps {
-  root: FileNode;
-  onOpenFile: (fileId: string) => void;
+  readonly root: FileNode;
+  readonly onOpenFile: (fileId: string) => void;
 }
 
 interface FileNodeItemProps {
-  node: FileNode;
-  onOpenFile: (fileId: string) => void;
-  level: number;
-  expandedDirs: Set<string>;
-  toggleExpanded: (nodeId: string) => void;
-  focusedNodeId?: string;
-  setFocusedNodeId: (nodeId: string | undefined) => void;
-  handleVerticalNavigation: (direction: "up" | "down") => void;
+  readonly node: FileNode;
+  readonly onOpenFile: (fileId: string) => void;
+  readonly level: number;
+  readonly expandedDirs: Set<string>;
+  readonly toggleExpanded: (nodeId: string) => void;
+  readonly focusedNodeId?: string;
+  readonly setFocusedNodeId: (nodeId: string | undefined) => void;
+  readonly handleVerticalNavigation: (direction: "up" | "down") => void;
 }
 
 function FileNodeItem({
@@ -180,7 +180,7 @@ export function FileTree({ root, onOpenFile }: FileTreeProps) {
       const newSet = new Set(prev);
       if (newSet.has(nodeId)) {
         // Collapsing directory - check if focused node becomes hidden
-        if (focusedNodeId && focusedNodeId.startsWith(nodeId + "/")) {
+        if (focusedNodeId?.startsWith(nodeId + "/")) {
           // Focus is on a child that will be hidden, move to parent
           setFocusedNodeId(nodeId);
         }

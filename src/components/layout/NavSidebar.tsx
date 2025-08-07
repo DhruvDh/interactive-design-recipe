@@ -4,8 +4,8 @@ import { buildFileTree } from "../../constants/navigation";
 import { useAnalysisContext } from "../../contexts/AnalysisContext";
 
 export interface NavSidebarProps {
-  onOpenFile: (fileId: string) => void;
-  timelineDisabled?: boolean;
+  readonly onOpenFile: (fileId: string) => void;
+  readonly timelineDisabled?: boolean;
 }
 
 export default function NavSidebar({
